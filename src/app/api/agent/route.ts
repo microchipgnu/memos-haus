@@ -5,6 +5,10 @@ import { generateObject, generateText } from 'ai';
 import { z } from 'zod';
 import { Memo } from '@/lib/core/storage';
 
+// Extend timeout for long-running operations
+export const maxDuration = 300; // 5 minutes in seconds
+
+
 console.log('Initializing schemas and types');
 
 // Schema for the AI response
