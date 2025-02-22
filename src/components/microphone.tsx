@@ -113,6 +113,7 @@ export default function Microphone({
               <Button
                 className="h-14 px-6 text-xl tracking-widest font-medium bg-[#FC7434] hover:bg-[#CD5C27] text-white rounded-lg"
                 onClick={onSpeakClick}
+                disabled={isIngesting}
               >
                 {buttonText}
               </Button>
@@ -162,6 +163,7 @@ export default function Microphone({
             <Button
               className="h-12 text-base tracking-widest font-medium bg-[#FC7434] hover:bg-[#CD5C27] text-white rounded-lg"
               onClick={onSpeakClick}
+              disabled={isIngesting}
             >
               {buttonText}
             </Button>
