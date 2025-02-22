@@ -94,9 +94,27 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
 
         const { text: aimContent } = await generateText({
             model: models.writing,
+            temperature: 0.2,
             system: systemPrompt,
-            prompt: `Make sure to follow strict AIM syntax. DO NOT output the content inside code fences. Just output the raw content.
-            
+            prompt: `Make sure to follow strict AIM syntax. DO NOT output the content inside code fences or markdown fences. Just output the raw content.
+
+            Start with either the frontmatter or just the content. DO NOT include the file path in the output.
+
+            **DO NOT INCLUDE BACKTICKS IN THE OUTPUT**
+
+            Example:
+            """
+            ---
+            frontmatter here...
+            ---
+
+            Content here...
+
+            what's the memo about?
+
+            {% ai /%}
+            """
+
             Current content:
             ${currentContent}`
         });

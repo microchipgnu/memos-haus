@@ -133,7 +133,7 @@ export function Conversation({ onMemoSelect }: { onMemoSelect: (memo: Memo) => v
             prompt: {
               prompt: systemPrompt
             },
-            firstMessage: firstMessage,
+            firstMessage: firstMessage[Math.floor(Math.random() * firstMessage.length)],
           },
           tts: {
             voiceId: "bIHbv24MWmeRgasZH58o"
@@ -158,7 +158,7 @@ export function Conversation({ onMemoSelect }: { onMemoSelect: (memo: Memo) => v
       updateCount={memoCount}
       statusText={conversation.status === 'connected' ?
         (conversation.isSpeaking ? 'PROCESSING' : 'LISTENING...') :
-        'READY TO LISTEN'
+        ingesting ? 'INGESTING' : 'READY TO LISTEN'
       }
       onSpeakClick={conversation.status === 'connected' ? stopConversation : startConversation}
       buttonText={conversation.status === 'connected' ? 'STOP' : 'START'}

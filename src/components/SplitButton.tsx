@@ -33,8 +33,6 @@ export default function SplitButton({
 
   const { memos, search } = useStorage();
 
-  console.log('______Memos:', memos)
-
   const [open, setOpen] = useState(false)
   const [searchResults, setSearchResults] = useState<Memo[]>(memos)
   const [query, setQuery] = useState("")
