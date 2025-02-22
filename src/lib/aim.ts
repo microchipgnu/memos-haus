@@ -45,7 +45,7 @@ export function createAim(content: string, files: { path: string; content: strin
                         tags: {
                             "wait": {
                                 render: "wait",
-                                execute: async function* ({ node, config, state }) {
+                                execute: async function* () {
                                     await new Promise(resolve => setTimeout(resolve, 1000));
                                 },
                             },

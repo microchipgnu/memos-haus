@@ -7,7 +7,7 @@ import Fuse from 'fuse.js';
 // Generic type for stored items
 interface StorageItem {
   id: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | object;
 }
 
 // Storage adapter interface
@@ -115,7 +115,7 @@ export const createMemoStorage = (initialData: Memo[] = []) => createStorage<Mem
  */
 export const saveMemo = (memo: Omit<Memo, 'id'> & { memoId: string }, storage = createMemoStorage()): void => {
   const { memoId, content, name } = memo;
-  storage.save({ id: memoId, content, name });
+  storage.save({ id: memoId, content: String(content), name: String(name) });
 };
 
 /**

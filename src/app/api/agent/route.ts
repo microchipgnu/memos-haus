@@ -2,20 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Role } from '@11labs/react';
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateObject, generateText } from 'ai';
-import fetch from 'node-fetch';
 import { z } from 'zod';
 import { Memo } from '@/lib/core/storage';
 
 console.log('Initializing schemas and types');
 
 // Schema for the AI response
-const responseSchema = z.object({
-    files: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        content: z.string()
-    }))
-});
+// const responseSchema = z.object({
+//     files: z.array(z.object({
+//         id: z.string(),
+//         name: z.string(),
+//         content: z.string()
+//     }))
+// });
 
 // Schema for the implementation plan
 const planSchema = z.object({
@@ -28,10 +27,10 @@ const planSchema = z.object({
 });
 
 // Schema for file changes
-const changeSchema = z.object({
-    explanation: z.string(),
-    code: z.string()
-});
+// const changeSchema = z.object({
+//     explanation: z.string(),
+//     code: z.string()
+// });
 
 // Schema for memo quality evaluation
 const memoEvalSchema = z.object({
@@ -44,48 +43,48 @@ const memoEvalSchema = z.object({
 });
 
 // Get system prompt for the AI
-async function getSystemPrompt(messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
-    console.log('Getting system prompt with messages:', messages.length, 'and memos:', memos.length);
-    
-    const llmsList = await (await fetch(new URL('/aim_llms.txt', process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'))).text();
-    console.log('Fetched LLMs list:', llmsList);
-
-    const prompt = `
-    You are an AI assistant that helps manage memos by converting chat history into a markdown program (AIM) or responding in markdown when no memo is needed.
-    
-    ### Primary Functions:
-    **Creating and Updating Memos:**
-       - Analyze the conversation history to identify content worth saving as a memo (e.g., instructions, reusable info).
-       - Extract key info and generate a clear, descriptive name (e.g., "installing_package_x").
-       - Structure the memo in AIM markdown format with a title, description, and content (use headers, lists, or code blocks as needed).
-       - Propose the memo to the user and confirm before saving.
-       - Return file paths and contents for new or updated memos.
-    
-    ### Guidelines:
-    - **AIM Format:** A markdown file with "# Title", "**Description:**", and "**Content:**" sections. Include code blocks (e.g., \`\`\`bash) for executable commands.
-    - **When to Create a Memo:** Look for explicit requests (e.g., "create a memo") or reusable content (e.g., step-by-step instructions). Otherwise, respond in markdown without creating a file.
-    - **Confirmation:** Always ask the user to confirm before saving or updating a memo.
-    - **Response Format:** For memos to save, include a "**New Memo**" or "**Update Memo**" section with "**File Path:**" and "**Content:**". For regular responses, use markdown.
-    
-    ### AIM Documentation:
-    Assume AIM is a standard markdown format unless specified by ${llmsList}, which may list compatible LLMs or additional formatting rules.
-    
-    ---
-    
-    ### This is the conversation history:
-    ${messages.map(msg => `${msg.source}: ${msg.message}`).join('\n')}
-    ---
-    
-    ### This is the current state of the memos:
-    ${memos.map(memo => `${memo.name}: ${memo.content}`).join('\n')}
-    ---
-
-    ALWAYS respond with the new files to be saved.
-    `;
-
-    console.log('Generated system prompt');
-    return prompt;
-}
+// async function getSystemPrompt(messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
+//     console.log('Getting system prompt with messages:', messages.length, 'and memos:', memos.length);
+//     
+//     const llmsList = await (await fetch(new URL('/aim_llms.txt', process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'))).text();
+//     console.log('Fetched LLMs list:', llmsList);
+//
+//     const prompt = `
+//     You are an AI assistant that helps manage memos by converting chat history into a markdown program (AIM) or responding in markdown when no memo is needed.
+//     
+//     ### Primary Functions:
+//     **Creating and Updating Memos:**
+//        - Analyze the conversation history to identify content worth saving as a memo (e.g., instructions, reusable info).
+//        - Extract key info and generate a clear, descriptive name (e.g., "installing_package_x").
+//        - Structure the memo in AIM markdown format with a title, description, and content (use headers, lists, or code blocks as needed).
+//        - Propose the memo to the user and confirm before saving.
+//        - Return file paths and contents for new or updated memos.
+//     
+//     ### Guidelines:
+//     - **AIM Format:** A markdown file with "# Title", "**Description:**", and "**Content:**" sections. Include code blocks (e.g., \`\`\`bash) for executable commands.
+//     - **When to Create a Memo:** Look for explicit requests (e.g., "create a memo") or reusable content (e.g., step-by-step instructions). Otherwise, respond in markdown without creating a file.
+//     - **Confirmation:** Always ask the user to confirm before saving or updating a memo.
+//     - **Response Format:** For memos to save, include a "**New Memo**" or "**Update Memo**" section with "**File Path:**" and "**Content:**". For regular responses, use markdown.
+//     
+//     ### AIM Documentation:
+//     Assume AIM is a standard markdown format unless specified by ${llmsList}, which may list compatible LLMs or additional formatting rules.
+//     
+//     ---
+//     
+//     ### This is the conversation history:
+//     ${messages.map(msg => `${msg.source}: ${msg.message}`).join('\n')}
+//     ---
+//     
+//     ### This is the current state of the memos:
+//     ${memos.map(memo => `${memo.name}: ${memo.content}`).join('\n')}
+//     ---
+//
+//     ALWAYS respond with the new files to be saved.
+//     `;
+//
+//     console.log('Generated system prompt');
+//     return prompt;
+// }
 
 // Validate request body
 function validateRequest(messages: unknown): messages is Array<{ message: string; source: Role }> {
@@ -97,7 +96,7 @@ function validateRequest(messages: unknown): messages is Array<{ message: string
 
 // Generate implementation plan
 async function generatePlan(messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
-    console.log('Generating implementation plan');
+    console.log('Generating implementation plan with', memos.length, 'memos');
     
     const openAIClient = createOpenAI({
         apiKey: process.env.OPENAI_API_KEY,
@@ -105,12 +104,12 @@ async function generatePlan(messages: Array<{ message: string; source: Role }>, 
 
     console.log('Created OpenAI client');
 
-    const systemPrompt = await getSystemPrompt(messages, memos);
+    // const systemPrompt = await getSystemPrompt(messages, memos);
 
     const result = await generateObject({
         model: openAIClient('o3-mini'),
         schema: planSchema,
-        system: systemPrompt,
+        // system: systemPrompt,
         prompt: `Analyze this conversation and plan memo changes:
         Messages: ${JSON.stringify(messages)}
         Current Memos: ${JSON.stringify(memos)}`
@@ -123,12 +122,13 @@ async function generatePlan(messages: Array<{ message: string; source: Role }>, 
 // Generate file changes based on plan with quality feedback loop
 async function generateChanges(plan: z.infer<typeof planSchema>, messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
     console.log('Generating changes for plan:', plan);
+    console.log(memos)
     
     const openAIClient = createOpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
 
-    const systemPrompt = await getSystemPrompt(messages, memos);
+    // const systemPrompt = await getSystemPrompt(messages, memos);
 
     const changes = await Promise.all(plan.files.map(async file => {
         console.log('Processing file:', file);
@@ -140,7 +140,7 @@ async function generateChanges(plan: z.infer<typeof planSchema>, messages: Array
         // Initial content generation
         const { text: initialContent } = await generateText({
             model: openAIClient('o3-mini'),
-            system: systemPrompt,
+            // system: systemPrompt,
             prompt: `Implement the changes for ${file.filePath} to support:
             ${file.purpose}
             
@@ -158,7 +158,7 @@ async function generateChanges(plan: z.infer<typeof planSchema>, messages: Array
             const { object: evaluation } = await generateObject({
                 model: openAIClient('o3-mini'),
                 schema: memoEvalSchema,
-                system: systemPrompt,
+                // system: systemPrompt,
                 prompt: `Evaluate this memo content:
                 ${currentContent}
                 
@@ -183,7 +183,7 @@ async function generateChanges(plan: z.infer<typeof planSchema>, messages: Array
 
             const { text: improvedContent } = await generateText({
                 model: openAIClient('o3-mini'),
-                system: systemPrompt,
+                // system: systemPrompt,
                 prompt: `Improve this memo content based on the following feedback:
                 ${evaluation.specificIssues.join('\n')}
                 ${evaluation.improvementSuggestions.join('\n')}
@@ -214,7 +214,7 @@ async function generateChanges(plan: z.infer<typeof planSchema>, messages: Array
 async function generateAIResponse(messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
     console.log('Generating AI response');
     
-    const systemPrompt = await getSystemPrompt(messages, memos);
+    // const systemPrompt = await getSystemPrompt(messages, memos);
     console.log('Got system prompt');
     
     // First generate implementation plan

@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button"
 import Info from "./info"
 import Voice from "./voice"
 import SplitButton from "./SplitButton"
+import Image from 'next/image'
 
 export interface MicrophoneProps {
-  title?: string
   commandShortcut?: string
   updateCount?: number
   buttonText?: string
@@ -16,7 +16,6 @@ export interface MicrophoneProps {
 }
 
 export default function Microphone({
-  title = "MEMOS",
   commandShortcut = "K",
   updateCount = 3.211,
   buttonText = "SPEAK",
@@ -33,9 +32,11 @@ export default function Microphone({
         >
           {/* Header */}
           <div className="bg-zinc-900 px-8 py-4 text-white flex justify-between items-center">
-            <img
+            <Image
               src="/memos-logo.svg"
               alt="Memos Logo"
+              width={100}
+              height={100}
               className="h-12 w-auto"
             />
             <span className="text-sm font-semibold tracking-wide">
@@ -47,9 +48,11 @@ export default function Microphone({
           <div className="grid grid-cols-[auto_1fr] items-stretch">
             {/* Left: microphone */}
             <div className="bg-[#F2F2F2] flex items-center justify-center p-0">
-              <img
+              <Image
                 src="/mic.svg"
                 alt="Microphone"
+                width={100}
+                height={100}
                 className="w-48 h-auto"
               />
             </div>
@@ -90,9 +93,11 @@ export default function Microphone({
         >
           {/* Header */}
           <div className="bg-zinc-900 px-4 py-2 text-white flex justify-between items-center">
-            <img
+            <Image
               src="/memos-logo.svg"
               alt="Memos Logo"
+              width={100}
+              height={100}
               className="h-8 w-auto"
             />
             <span className="text-xs font-semibold tracking-wide">
@@ -102,9 +107,11 @@ export default function Microphone({
 
           {/* Wide mic image */}
           <div className="bg-[#F2F2F2]">
-            <img
+            <Image
               src="/mic-wide.svg"
               alt="Microphone"
+              width={100}
+              height={100}
               className="w-full h-auto"
             />
           </div>

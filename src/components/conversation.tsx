@@ -6,12 +6,14 @@ import { Role, useConversation } from '@11labs/react';
 import { useCallback, useState } from 'react';
 import Microphone from "./microphone";
 
+interface Message {
+  role: string;
+  content: string;
+}
+
 export function Conversation() {
 
-  const [messages, setMessages] = useState<Array<{
-    message: string;
-    source: Role;
-  }>>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const conversation = useConversation({
     onConnect: () => console.log('Connected'),
@@ -56,9 +58,12 @@ export function Conversation() {
         message: string;
         source: Role;
     }) => {
-        setMessages(prev => [...prev, message])
+        setMessages(prev => [...prev, {
+            role: message.source,
+            content: message.message
+        }])
     },
-    onError: (error: any) => console.error('Error:', error),
+    onError: (error: Error) => console.error('Error:', error),
     clientTools: {
         listMemos: async () => {
             const storage = createMemoStorage();
@@ -69,7 +74,8 @@ export function Conversation() {
             return JSON.stringify(searchMemos(memo_name))
         },
         saveMemo: async ({name, content}: {name: string, content: string}) => {
-            console.log("not implemented")
+            console.log("Saving memo:", name, content);
+            // Implementation here
         },
         runMemo: async ({memo_name}: {memo_name: string}) => {
             const memo = searchMemos(memo_name)[0]
