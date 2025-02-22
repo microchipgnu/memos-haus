@@ -50,6 +50,9 @@ export function Conversation() {
                     }, storage);
                 }
             });
+
+            // Clear messages after processing
+            setMessages([]);
         } catch (error) {
             console.error('Error:', error)
         }

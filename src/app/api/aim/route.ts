@@ -17,9 +17,12 @@ export async function POST(request: NextRequest) {
         }, maxDuration * 1000);
 
         const body = await request.json();
-        const files = body.files;
 
-        const aimDoc = createAim(body.content, files, signal);
+        const files = body.files;
+        const content = body.content;
+        const inputs = body.inputs;
+
+        const aimDoc = createAim(content, files, inputs, signal);
 
         // Create a TransformStream for streaming
         const stream = new TransformStream();

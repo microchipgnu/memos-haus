@@ -2,7 +2,7 @@ import { aim, defaultRuntimeOptions } from "@aim-sdk/core"
 import { codeAdapter } from "@aim-sdk/adapters-code-e2b";
 import { getToolsPlugin } from "@aim-sdk/plugins-get-tools";
 
-export function createAim(content: string, files: { path: string; content: string }[], abortSignal: AbortSignal) {
+export function createAim(content: string, files: { path: string; content: string }[], inputs: Record<string, any>, abortSignal: AbortSignal) {
     return aim({
         content,
         options: {
