@@ -95,7 +95,7 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
         const { text: aimContent } = await generateText({
             model: models.writing,
             system: systemPrompt,
-            prompt: `Make sure to follow strict AIM syntax.
+            prompt: `Make sure to follow strict AIM syntax. DO NOT output the content inside code fences. Just output the raw content.
             
             Current content:
             ${currentContent}`
