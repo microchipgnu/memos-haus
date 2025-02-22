@@ -1,4 +1,4 @@
-export const firstMessage = "Welcome to titties! Feel free to start talking..."
+export const firstMessage = "Welcome to memos! Feel free to start talking..."
 
 export const systemPrompt = `
 
