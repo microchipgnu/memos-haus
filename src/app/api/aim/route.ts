@@ -1,4 +1,5 @@
 import { createAim } from "@/lib/aim";
+import { Memo } from "@/lib/core/storage";
 import { type RenderableTreeNode, renderers } from "@aim-sdk/core";
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -19,10 +20,18 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
 
         const files = body.files;
+
+        const aimFiles = files.map((file: Memo) => ({
+            path: file.id,
+            content: file.content
+        }));
+
         const content = body.content;
         const inputs = body.inputs;
 
-        const aimDoc = createAim(content, files, signal);
+        console.log("INPUTS:", inputs)
+
+        const aimDoc = createAim(content, aimFiles, signal);
 
         // Create a TransformStream for streaming
         const stream = new TransformStream();
@@ -34,7 +43,9 @@ export async function POST(request: NextRequest) {
                 const encoder = new TextEncoder();
                 
                 for await (const chunk of aimDoc.executeWithGenerator({ 
-                    inputs 
+                    input: {
+                        ...inputs,
+                    } 
                 })) {
                     if (signal.aborted) {
                         throw new Error('Request aborted');
