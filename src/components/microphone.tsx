@@ -8,7 +8,7 @@ import AnimatedLogo from "@/components/AnimatedLogo"
 import Image from "next/image"
 
 // Import icons from lucide-react
-import { Activity, Ear } from "lucide-react"
+import { Activity, Ear, Loader2 } from "lucide-react"
 
 export interface MicrophoneProps {
   commandShortcut?: string
@@ -19,6 +19,7 @@ export interface MicrophoneProps {
   className?: string
   conversationStatus?: string  // or a more specific type if you want
   isSpeaking?: boolean
+  isIngesting?: boolean
 }
 
 export default function Microphone({
@@ -28,6 +29,7 @@ export default function Microphone({
   statusText = "READY TO LISTEN",
   onSpeakClick = () => console.log("Speak button clicked"),
   className = "",
+  isIngesting = false,
 }: MicrophoneProps) {
   // Decide icon colors based on the statusText
   function getIconColors(status: string) {
@@ -78,6 +80,7 @@ export default function Microphone({
             <div className="absolute left-1/2 transform -translate-x-1/2 flex gap-3">
               <Activity color={activityColor} size={18} />
               <Ear color={earColor} size={18} />
+              <Loader2 className={isIngesting ? "animate-spin" : ""}  size={18} color={isIngesting ? "#ffffff" : "#4B4B4B"} />
             </div>
 
             {/* Right: Status text */}
@@ -128,6 +131,7 @@ export default function Microphone({
             <div className="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
               <Activity color={activityColor} size={16} />
               <Ear color={earColor} size={16} />
+              <Loader2 className={isIngesting ? "animate-spin" : ""}  size={18} color={isIngesting ? "#ffffff" : "#4B4B4B"} />
             </div>
 
             {/* Right: Status text */}

@@ -14,12 +14,14 @@ interface Message {
 export function Conversation() {
 
   const [messages, setMessages] = useState<Message[]>([]);
+  const [ingesting, setIngesting] = useState(false);
 
   const conversation = useConversation({
     onConnect: () => console.log('Connected'),
     onDisconnect: async () => {
         console.log('Disconnected')
         try {
+            setIngesting(true);
             const response = await fetch('/api/agent', {
                 method: 'POST',
                 headers: {
@@ -53,6 +55,7 @@ export function Conversation() {
 
             // Clear messages after processing
             setMessages([]);
+            setIngesting(false);
         } catch (error) {
             console.error('Error:', error)
         }
@@ -137,6 +140,7 @@ export function Conversation() {
 
       conversationStatus={conversation.status}
       isSpeaking={conversation.isSpeaking}
+      isIngesting={ingesting}
     />
   );
 }
