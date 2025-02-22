@@ -1,10 +1,9 @@
 import { Role } from "@11labs/client";
-import { Memo } from "../storage";
-import { planSchema } from "./plan";
-import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
+import { Memo } from "../storage";
 import { config } from "./config";
+import { planSchema } from "./plan";
 
 const memoEvalSchema = z.object({
     qualityScore: z.number(),
