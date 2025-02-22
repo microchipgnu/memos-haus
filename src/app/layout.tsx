@@ -28,6 +28,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <a href="https://aim.tools" target="_blank" rel="noopener noreferrer" className="fixed bottom-4 right-4 bg-black/80 text-white px-3 py-1.5 rounded-full text-sm">
+            Powered by <span className="font-bold">AIM</span>
+        </a>
       </body>
     </html>
   );

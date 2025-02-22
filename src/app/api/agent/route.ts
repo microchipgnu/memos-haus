@@ -1,4 +1,4 @@
-import { generateAIResponse } from '@/lib/core/agent/workflow';
+import { updateState } from '@/lib/core/agent/workflow';
 import { Role } from '@11labs/react';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -17,10 +17,10 @@ export async function POST(req: NextRequest) {
         console.log('Processing POST request to /api/agent');
         
         const body = await req.json();
-        const { messages, localStorage } = body;
+        const { messages, memos } = body;
 
         console.log('Received messages:', messages);
-        console.log('Received localStorage:', localStorage);
+        console.log('Received memos:', memos);
 
         if (!validateRequest(messages)) {
             console.warn('Invalid messages format received');
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const result = await generateAIResponse(messages, localStorage);
+        const result = await updateState(messages, memos);
         console.log('Agent response:', result);
 
         if (!result.files || result.files.length === 0) {

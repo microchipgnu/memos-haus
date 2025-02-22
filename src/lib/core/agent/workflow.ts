@@ -3,25 +3,28 @@ import { generatePlan } from "./plan";
 import { Memo } from "../storage";
 import { Role } from "@11labs/client";
 
-export async function generateAIResponse(messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
-    console.log('Generating AI response');
+export async function updateState(messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
+    console.log('Updating state');
     
     // First generate implementation plan
-    const plan = await generatePlan(messages, memos);
+    let plan = await generatePlan(messages, memos);
     console.log('Generated implementation plan:', JSON.stringify(plan, null, 2));
 
     let planObject = plan.object;
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    // Retry if no files returned
+    while ((!planObject || !planObject.files || planObject.files.length === 0) && retryCount < maxRetries) {
+        console.log(`No files in plan, retrying (attempt ${retryCount + 1}/${maxRetries})`);
+        plan = await generatePlan(messages, memos);
+        planObject = plan.object;
+        retryCount++;
+    }
+
     if (!planObject || !planObject.files || planObject.files.length === 0) {
-        // If no files to change, create a default memo from the conversation
-        const defaultMemo = {
-            filePath: 'conversation-memo.md',
-            purpose: 'Capture conversation content', 
-            changeType: 'create' as const
-        };
-        planObject = {
-            files: [defaultMemo],
-            estimatedComplexity: 'low' as const
-        };
+        console.warn('Still no files after retries');
+        return { files: [] };
     }
     
     // Then generate specific changes

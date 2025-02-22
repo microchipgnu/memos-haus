@@ -1,18 +1,21 @@
 // run this with bun run src/lib/core/agent/manual-run.ts
 
-import { generateAIResponse } from "./workflow";
+import { updateState } from "./workflow";
 import type { Role } from "@11labs/client";
 
 const memos = [
-    { content: "AIM is nice", name: "AIM_nice", id: "1" },
+    { id: "memo1", name: "Shopping List", content: "1. Milk\n2. Eggs\n3. Bread\n4. Coffee" },
+    { id: "memo2", name: "Meeting Notes", content: "Team sync discussion points:\n- Project timeline review\n- Budget updates\n- Next sprint planning" },
+    { id: "memo3", name: "Todo Tasks", content: "- Complete project documentation\n- Review pull requests\n- Schedule team meeting\n- Update status report" },
+    { id: "memo4", name: "Recipe", content: "Chocolate Chip Cookies:\n- 2 cups flour\n- 1 cup butter\n- 2 eggs\n- 1 cup chocolate chips" },
+    { id: "memo5", name: "Contact Info", content: "John Doe\nEmail: john@example.com\nPhone: (555) 123-4567" }
 ];
 
 const messages = [
-    { message: "AIM is nice", source: "user" as Role },
+    { message: "I need an AIM flow that can generate recipes", source: "user" as Role },
     { message: "Go ahead...", source: "ai" as Role },
-    { message: "I need to create code that gets data from the wikipedia", source: "user" as Role },
 ];
 
-const response = await generateAIResponse(messages, memos);
+const response = await updateState(messages, memos);
 
 console.log("RESPONSE", JSON.stringify(response, null, 2));

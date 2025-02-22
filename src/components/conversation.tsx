@@ -3,7 +3,7 @@
 import { createMemoStorage, Memo, saveMemo, searchMemos, getMemos } from "@/lib/core/storage";
 import { firstMessage, systemPrompt } from "@/lib/elevenlabs/config";
 import { Role, useConversation } from '@11labs/react';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import Microphone from "./microphone";
 
 interface Message {
@@ -15,6 +15,13 @@ export function Conversation() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [ingesting, setIngesting] = useState(false);
+  const messagesRef = useRef<Message[]>([]);
+
+  // Keep ref in sync with state
+  const updateMessages = (newMessages: Message[]) => {
+    messagesRef.current = newMessages;
+    setMessages(newMessages);
+  };
 
   const conversation = useConversation({
     onConnect: () => console.log('Connected'),
@@ -22,12 +29,26 @@ export function Conversation() {
         console.log('Disconnected')
         try {
             setIngesting(true);
+
+            // Use ref instead of state to ensure we have latest messages
+            const currentMessages = messagesRef.current;
+            
+            // Filter out empty messages
+            const nonEmptyMessages = currentMessages.filter(msg => msg.content.trim() !== '');
+
+            // Don't make API call if no non-empty messages
+            if (nonEmptyMessages.length === 0) {
+                setIngesting(false);
+                return;
+            }
+
+            console.log('Sending memos:', createMemoStorage().getAll());
             const response = await fetch('/api/agent', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ messages, localStorage: createMemoStorage().getAll() })
+                body: JSON.stringify({ messages: nonEmptyMessages, memos: createMemoStorage().getAll() })
             });
 
             if (!response.ok) {
@@ -38,7 +59,7 @@ export function Conversation() {
             console.log(data.response);
 
             const memos = data.memos;
-            // Create new storage instance and overwrite with received memos
+
             const storage = createMemoStorage();
             const existingMemos = storage.getAll();
             
@@ -54,7 +75,7 @@ export function Conversation() {
             });
 
             // Clear messages after processing
-            setMessages([]);
+            updateMessages([]);
             setIngesting(false);
         } catch (error) {
             console.error('Error:', error)
@@ -64,10 +85,11 @@ export function Conversation() {
         message: string;
         source: Role;
     }) => {
-        setMessages(prev => [...prev, {
+        const newMessages = [...messagesRef.current, {
             role: message.source,
             content: message.message
-        }])
+        }];
+        updateMessages(newMessages);
     },
     onError: (error: Error) => console.error('Error:', error),
     clientTools: {

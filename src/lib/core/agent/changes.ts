@@ -2,10 +2,9 @@ import { Role } from "@11labs/client";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 import { Memo } from "../storage";
-import { config } from "./config";
 import { planSchema } from "./plan";
 import { writeAIM } from "./write-aim";
-
+import { models } from "./config";
 const memoEvalSchema = z.object({
     qualityScore: z.number(),
     structureValid: z.boolean(),
@@ -17,7 +16,7 @@ const memoEvalSchema = z.object({
 
 export async function generateChanges(plan: z.infer<typeof planSchema>, messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
     console.log('Generating changes for plan:', JSON.stringify(plan, null, 2));
-    console.log(memos)
+    console.log('Memos:', JSON.stringify(memos, null, 2));
 
     const systemPrompt = await writeAIM(messages, memos);
 
@@ -30,7 +29,7 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
 
         // Initial content generation
         const { text: initialContent } = await generateText({
-            model: config.openai('o3-mini'),
+            model: models.o3Mini,
             system: systemPrompt,
             prompt: `Implement the changes for ${file.filePath} to support:
             ${file.purpose}
@@ -47,11 +46,13 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
             console.log('Starting iteration', JSON.stringify(iterations + 1, null, 2));
 
             const { object: evaluation } = await generateObject({
-                model: config.openai('o3-mini'),
+                model: models.o3Mini,
                 schema: memoEvalSchema,
                 system: systemPrompt,
                 prompt: `Evaluate this memo content:
                 ${currentContent}
+
+                DO NOT include any other text or questions.
                 
                 Consider:
                 1. Overall quality
@@ -73,11 +74,13 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
             }
 
             const { text: improvedContent } = await generateText({
-                model: config.openai('o3-mini'),
+                model: models.o3Mini,
                 system: systemPrompt,
                 prompt: `Improve this memo content based on the following feedback:
                 ${evaluation.specificIssues.join('\n')}
                 ${evaluation.improvementSuggestions.join('\n')}
+
+                DO NOT include any other text or questions.
                 
                 Current content:
                 ${currentContent}`
