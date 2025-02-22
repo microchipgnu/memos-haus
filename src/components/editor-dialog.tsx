@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { useStorage } from "@/hooks/use-storage"
@@ -9,7 +11,7 @@ import yaml from 'yaml'
 
 interface EditorDialogProps {
     memo: Memo | null
-    result: string
+    result: string 
     isRunning: boolean
     onClose: () => void
     onCodeChange: (value: string | undefined) => void
@@ -26,51 +28,51 @@ export function EditorDialog({
     onRun,
     onBack
 }: EditorDialogProps) {
-    const { saveMemo } = useStorage();
+    const { saveMemo } = useStorage()
 
-    const [showInputDialog, setShowInputDialog] = React.useState(false);
+    const [showInputDialog, setShowInputDialog] = React.useState(false)
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    const [inputValues, setInputValues] = React.useState<Record<string, any>>({});
-    const resultRef = React.useRef<HTMLDivElement>(null);
-    const [hasChanges, setHasChanges] = React.useState(false);
-    const [currentCode, setCurrentCode] = React.useState<string | undefined>(undefined);
+    const [inputValues, setInputValues] = React.useState<Record<string, any>>({})
+    const resultRef = React.useRef<HTMLDivElement>(null)
+    const [hasChanges, setHasChanges] = React.useState(false)
+    const [currentCode, setCurrentCode] = React.useState<string | undefined>(undefined)
 
     React.useEffect(() => {
         if (memo?.content) {
-            setCurrentCode(memo.content);
+            setCurrentCode(memo.content)
         }
-    }, [memo?.content]);
+    }, [memo?.content])
 
     // Parse frontmatter if present and extract input fields
-    const hasFrontmatter = memo?.content.trim().startsWith('---');
+    const hasFrontmatter = memo?.content.trim().startsWith('---')
     const frontmatterInputs = React.useMemo(() => {
-        if (!hasFrontmatter) return null;
+        if (!hasFrontmatter) return null
 
         try {
             // Extract content between first two --- markers
-            const matches = memo?.content.match(/^---\n([\s\S]*?)\n---/);
-            if (!matches) return null;
+            const matches = memo?.content.match(/^---\n([\s\S]*?)\n---/)
+            if (!matches) return null
 
-            const frontmatterContent = matches[1];
-            const parsed = yaml.parse(frontmatterContent);
+            const frontmatterContent = matches[1]
+            const parsed = yaml.parse(frontmatterContent)
 
             // Check if input field exists and is an array
             if (!parsed?.input || !Array.isArray(parsed.input)) {
-                return null;
+                return null
             }
 
             // Validate and transform input fields
             const inputs = parsed.input.map((field: {
-                type?: string;
-                name?: string;
-                description?: string;
-                required?: boolean;
-                default?: any;
+                type?: string
+                name?: string
+                description?: string
+                required?: boolean
+                default?: any
             }) => {
-                if (typeof field !== 'object') return null;
+                if (typeof field !== 'object') return null
 
                 // Ensure required properties exist
-                if (!field.type || !field.name) return null;
+                if (!field.type || !field.name) return null
 
                 return {
                     type: field.type,
@@ -78,37 +80,37 @@ export function EditorDialog({
                     description: field.description || '',
                     required: field.required ?? true,
                     default: field.default
-                };
-            }).filter(Boolean);
+                }
+            }).filter(Boolean)
 
-            return inputs.length > 0 ? inputs : null;
+            return inputs.length > 0 ? inputs : null
 
         } catch (e) {
-            console.error('Error parsing frontmatter:', e);
-            return null;
+            console.error('Error parsing frontmatter:', e)
+            return null
         }
-    }, [memo?.content, hasFrontmatter]);
+    }, [memo?.content, hasFrontmatter])
 
     const handleRunClick = () => {
         if (frontmatterInputs) {
-            setShowInputDialog(true);
+            setShowInputDialog(true)
         } else {
-            onRun();
+            onRun()
         }
-    };
+    }
 
     const handleInputSubmit = () => {
-        setShowInputDialog(false);
-        onRun(inputValues);
-    };
+        setShowInputDialog(false)
+        onRun(inputValues)
+    }
 
     const handleCodeChange = (value: string | undefined) => {
         if (value) {
-            setCurrentCode(value);
-            setHasChanges(value !== memo?.content);
-            onCodeChange(value);
+            setCurrentCode(value)
+            setHasChanges(value !== memo?.content)
+            onCodeChange(value)
         }
-    };
+    }
 
     const handleSaveChanges = () => {
         if (memo && currentCode) {
@@ -116,10 +118,10 @@ export function EditorDialog({
                 id: memo.id,
                 content: currentCode,
                 name: memo.name
-            });
-            setHasChanges(false);
+            })
+            setHasChanges(false)
         }
-    };
+    }
 
     // Auto-scroll to bottom when new content arrives
     React.useEffect(() => {
@@ -128,24 +130,24 @@ export function EditorDialog({
                 resultRef.current?.scrollTo({
                     top: resultRef.current.scrollHeight,
                     behavior: 'smooth'
-                });
-            };
-            scrollToBottom();
+                })
+            }
+            scrollToBottom()
             // Add a small delay to ensure content is rendered
-            const timeoutId = setTimeout(scrollToBottom, 100);
-            return () => clearTimeout(timeoutId);
+            const timeoutId = setTimeout(scrollToBottom, 100)
+            return () => clearTimeout(timeoutId)
         }
-    }, [result]);
+    }, [result])
 
     return (
         <>
             <Dialog open={memo !== null} onOpenChange={(open) => !open && onClose()}>
-                <DialogContent className="max-w-4xl bg-gradient-to-br from-gray-900 via-zinc-900 to-black">
-                    <DialogTitle className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-zinc-400 mb-4">
+                <DialogContent className="max-w-4xl bg-zinc-900">
+                    <DialogTitle className="text-zinc-100 mb-4">
                         {memo?.id}
                     </DialogTitle>
 
-                    <div className={`relative h-[70vh] ${isRunning ? 'bg-purple-500/5 transition-colors duration-1000' : ''}`}>
+                    <div className={`relative h-[70vh] ${isRunning ? 'bg-[#FC7434]/5 transition-colors duration-1000' : ''}`}>
                         {!result ? (
                             <MonacoEditor
                                 height="100%"
@@ -167,7 +169,7 @@ export function EditorDialog({
                             />
                         ) : (
                             <div className="h-full overflow-y-auto overflow-x-auto" ref={resultRef}>
-                                <div className="output-preview h-full p-4 bg-black/50 rounded-md text-sm text-gray-300 whitespace-pre-wrap break-words" style={{ maxWidth: '100%' }}>
+                                <div className="output-preview h-full p-4 bg-zinc-900/50 rounded-md text-sm text-zinc-300 whitespace-pre-wrap break-words" style={{ maxWidth: '100%' }}>
                                     <style scoped>
                                         {`
                                         .output-preview div {
@@ -176,150 +178,150 @@ export function EditorDialog({
                                             max-width: 100%;
                                         }
 
-                                    .output-preview h1 {
-                                        font-size: 1.5rem;
-                                        font-weight: 600;
-                                        color: rgb(229, 231, 235);
-                                        padding-top: 0.75rem;
-                                        padding-bottom: 0.75rem;
-                                        margin-top: 0.75rem;
-                                        margin-bottom: 0.75rem;
-                                        line-height: 1.75;
-                                    }
+                                        .output-preview h1 {
+                                            font-size: 1.5rem;
+                                            font-weight: 600;
+                                            color: rgb(244, 244, 245);
+                                            padding-top: 0.75rem;
+                                            padding-bottom: 0.75rem;
+                                            margin-top: 0.75rem;
+                                            margin-bottom: 0.75rem;
+                                            line-height: 1.75;
+                                        }
                                     
-                                    .output-preview h2 {
-                                        font-size: 1.25rem;
-                                        font-weight: 600;
-                                        color: rgb(229, 231, 235);
-                                        padding-top: 0.75rem;
-                                        padding-bottom: 0.75rem;
-                                        margin-top: 0.75rem;
-                                        margin-bottom: 0.75rem;
-                                        line-height: 1.75;
-                                    }
-
-                                    .output-preview p {
-                                        display: block;
-                                        padding: 0.5rem 0;
-                                        margin: 0.5rem 0;
-                                        color: #d1d5db;
-                                        line-height: 1.6;
-                                        font-size: 1rem;
-                                        word-wrap: break-word;
-                                        overflow-wrap: break-word;
-                                    }
-
-                                    .output-preview ai {
-                                        display: block;
-                                        padding: 0.75rem 1rem;
-                                        margin: 0.5rem 0.25rem;
-                                        border: 1px solid #3b82f6;
-                                        border-radius: 0.375rem;
-                                        background-color: rgba(59, 130, 246, 0.1);
-                                        color: #60a5fa;
-                                        font-weight: 500;
-                                        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-                                        transition: all 0.2s ease;
-                                        cursor: pointer;
-                                        position: relative;
-                                        word-wrap: break-word;
-                                        overflow-wrap: break-word;
-                                    }
-
-                                    .output-preview ai:before {
-                                        content: "▼";
-                                        position: absolute;
-                                        right: 1rem;
-                                        top: 0.75rem;
-                                        transition: transform 0.2s ease;
-                                    }
-
-                                    .output-preview ai.collapsed:before {
-                                        transform: rotate(-90deg);
-                                    }
-
-                                    .output-preview ai.collapsed > *:not(:first-child) {
-                                        display: none;
-                                    }
-
-                                    .output-preview ai:hover {
-                                        background-color: rgba(59, 130, 246, 0.2);
-                                        border-color: #60a5fa;
-                                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                                    }
-
-                                    .output-preview if {
-                                        display: block;
-                                        padding: 0.75rem;
-                                        margin: 0.5rem 0;
-                                        border: 2px solid #3b82f6;
-                                        border-radius: 0.375rem;
-                                        background-color: rgba(59, 130, 246, 0.1);
-                                        position: relative;
-                                        word-wrap: break-word;
-                                        overflow-wrap: break-word;
-                                    }
-
-                                    .output-preview else {
-                                        display: block;
-                                        padding: 0.75rem;
-                                        margin: 0.5rem 0;
-                                        border: 1px solid #3b82f6;
-                                        border-radius: 0.375rem;
-                                        background-color: rgba(59, 130, 246, 0.1);
-                                        color: #60a5fa;
-                                        font-weight: 500;
-                                        word-wrap: break-word;
-                                        overflow-wrap: break-word;
-                                    }
-
-                                    .output-preview loop {
-                                        display: block;
-                                        padding: 1rem;
-                                        margin: 1rem 0;
-                                        border: 2px solid #374151;
-                                        border-radius: 0.5rem;
-                                        background-color: rgba(31, 41, 55, 0.5);
-                                        position: relative;
-                                        word-wrap: break-word;
-                                        overflow-wrap: break-word;
-                                    }
-
-                                    .output-preview .loading {
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        height: 1.5rem;
-                                        width: 1.5rem;
-                                    }
-
-                                    .output-preview .loading div {
-                                        animation: spin 1s linear infinite;
-                                        height: 1rem;
-                                        width: 1rem;
-                                        border-radius: 9999px;
-                                        border-bottom: 2px solid #60a5fa;
-                                    }
-
-                                    @keyframes spin {
-                                        to {
-                                            transform: rotate(360deg);
+                                        .output-preview h2 {
+                                            font-size: 1.25rem;
+                                            font-weight: 600;
+                                            color: rgb(244, 244, 245);
+                                            padding-top: 0.75rem;
+                                            padding-bottom: 0.75rem;
+                                            margin-top: 0.75rem;
+                                            margin-bottom: 0.75rem;
+                                            line-height: 1.75;
                                         }
-                                    }
 
-                                    .animate-fadeIn {
-                                        animation: fadeIn 0.2s ease-in;
-                                    }
+                                        .output-preview p {
+                                            display: block;
+                                            padding: 0.5rem 0;
+                                            margin: 0.5rem 0;
+                                            color: rgb(228, 228, 231);
+                                            line-height: 1.6;
+                                            font-size: 1rem;
+                                            word-wrap: break-word;
+                                            overflow-wrap: break-word;
+                                        }
 
-                                    @keyframes fadeIn {
-                                        from {
-                                            opacity: 0;
+                                        .output-preview ai {
+                                            display: block;
+                                            padding: 0.75rem 1rem;
+                                            margin: 0.5rem 0.25rem;
+                                            border: 1px solid #FC7434;
+                                            border-radius: 0.375rem;
+                                            background-color: rgba(252, 116, 52, 0.1);
+                                            color: #FC7434;
+                                            font-weight: 500;
+                                            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+                                            transition: all 0.2s ease;
+                                            cursor: pointer;
+                                            position: relative;
+                                            word-wrap: break-word;
+                                            overflow-wrap: break-word;
                                         }
-                                        to {
-                                            opacity: 1;
+
+                                        .output-preview ai:before {
+                                            content: "▼";
+                                            position: absolute;
+                                            right: 1rem;
+                                            top: 0.75rem;
+                                            transition: transform 0.2s ease;
                                         }
-                                    }
-                                    `}
+
+                                        .output-preview ai.collapsed:before {
+                                            transform: rotate(-90deg);
+                                        }
+
+                                        .output-preview ai.collapsed > *:not(:first-child) {
+                                            display: none;
+                                        }
+
+                                        .output-preview ai:hover {
+                                            background-color: rgba(252, 116, 52, 0.2);
+                                            border-color: #CD5C27;
+                                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                                        }
+
+                                        .output-preview if {
+                                            display: block;
+                                            padding: 0.75rem;
+                                            margin: 0.5rem 0;
+                                            border: 2px solid #FC7434;
+                                            border-radius: 0.375rem;
+                                            background-color: rgba(252, 116, 52, 0.1);
+                                            position: relative;
+                                            word-wrap: break-word;
+                                            overflow-wrap: break-word;
+                                        }
+
+                                        .output-preview else {
+                                            display: block;
+                                            padding: 0.75rem;
+                                            margin: 0.5rem 0;
+                                            border: 1px solid #FC7434;
+                                            border-radius: 0.375rem;
+                                            background-color: rgba(252, 116, 52, 0.1);
+                                            color: #FC7434;
+                                            font-weight: 500;
+                                            word-wrap: break-word;
+                                            overflow-wrap: break-word;
+                                        }
+
+                                        .output-preview loop {
+                                            display: block;
+                                            padding: 1rem;
+                                            margin: 1rem 0;
+                                            border: 2px solid rgb(63, 63, 70);
+                                            border-radius: 0.5rem;
+                                            background-color: rgba(39, 39, 42, 0.5);
+                                            position: relative;
+                                            word-wrap: break-word;
+                                            overflow-wrap: break-word;
+                                        }
+
+                                        .output-preview .loading {
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            height: 1.5rem;
+                                            width: 1.5rem;
+                                        }
+
+                                        .output-preview .loading div {
+                                            animation: spin 1s linear infinite;
+                                            height: 1rem;
+                                            width: 1rem;
+                                            border-radius: 9999px;
+                                            border-bottom: 2px solid #FC7434;
+                                        }
+
+                                        @keyframes spin {
+                                            to {
+                                                transform: rotate(360deg);
+                                            }
+                                        }
+
+                                        .animate-fadeIn {
+                                            animation: fadeIn 0.2s ease-in;
+                                        }
+
+                                        @keyframes fadeIn {
+                                            from {
+                                                opacity: 0;
+                                            }
+                                            to {
+                                                opacity: 1;
+                                            }
+                                        }
+                                        `}
                                     </style>
                                     <div className="max-h-[500px] overflow-auto w-full animate-fadeIn" style={{ maxWidth: '100%', wordBreak: 'break-word' }}>
                                         <div dangerouslySetInnerHTML={{ __html: result }} />
@@ -340,7 +342,7 @@ export function EditorDialog({
                         {hasChanges && (
                             <Button
                                 onClick={handleSaveChanges}
-                                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold hover:from-green-600 hover:to-emerald-700"
+                                className="bg-[#FC7434] hover:bg-[#CD5C27] text-white"
                             >
                                 Save Changes
                             </Button>
@@ -349,7 +351,7 @@ export function EditorDialog({
                             <Button
                                 onClick={handleRunClick}
                                 disabled={isRunning}
-                                className={`bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold hover:from-blue-600 hover:to-indigo-700 ${isRunning ? 'animate-pulse' : ''}`}
+                                className={`bg-[#FC7434] hover:bg-[#CD5C27] text-white ${isRunning ? 'animate-pulse' : ''}`}
                             >
                                 {isRunning ? (
                                     <>
@@ -365,7 +367,7 @@ export function EditorDialog({
                         ) : (
                             <Button
                                 onClick={onBack}
-                                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold hover:from-blue-600 hover:to-indigo-700"
+                                className="bg-[#FC7434] hover:bg-[#CD5C27] text-white"
                             >
                                 Back to Code
                             </Button>
@@ -376,8 +378,8 @@ export function EditorDialog({
 
             {/* Input Dialog */}
             <Dialog open={showInputDialog} onOpenChange={setShowInputDialog}>
-                <DialogContent className="bg-gradient-to-br from-gray-900 via-zinc-900 to-black">
-                    <DialogTitle className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-zinc-400">Enter Input Values</DialogTitle>
+                <DialogContent className="bg-zinc-900">
+                    <DialogTitle className="text-zinc-100">Enter Input Values</DialogTitle>
                     <div className="space-y-4">
                         {frontmatterInputs?.map((field: {
                             type: string;
@@ -387,15 +389,15 @@ export function EditorDialog({
                             default: any;
                         }) => (
                             <div key={field.name} className="space-y-2">
-                                <label className="text-sm text-gray-300">
+                                <label className="text-sm text-zinc-300">
                                     {field.name}
                                     {field.description && (
-                                        <span className="ml-2 text-gray-500">{field.description}</span>
+                                        <span className="ml-2 text-zinc-500">{field.description}</span>
                                     )}
                                 </label>
                                 <input
                                     type={field.type === 'number' ? 'number' : 'text'}
-                                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white"
+                                    className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-100"
                                     defaultValue={field.default}
                                     required={field.required}
                                     onChange={(e) => setInputValues(prev => ({
@@ -411,7 +413,7 @@ export function EditorDialog({
                             </Button>
                             <Button
                                 onClick={handleInputSubmit}
-                                className="bg-gradient-to-r from-gray-400 to-zinc-400 text-black font-semibold hover:from-gray-500 hover:to-zinc-500"
+                                className="bg-[#FC7434] hover:bg-[#CD5C27] text-white"
                             >
                                 Run
                             </Button>
