@@ -2,7 +2,7 @@ import { aim, defaultRuntimeOptions } from "@aim-sdk/core"
 import { codeAdapter } from "@aim-sdk/adapters-code-e2b";
 import { getToolsPlugin } from "@aim-sdk/plugins-get-tools";
 
-export function createAim(content: string, files: { path: string; content: string }[], inputs: Record<string, any>, abortSignal: AbortSignal) {
+export function createAim(content: string, files: { path: string; content: string }[], abortSignal: AbortSignal) {
     return aim({
         content,
         options: {
@@ -28,16 +28,15 @@ export function createAim(content: string, files: { path: string; content: strin
                 onLog: (message) => {
                     console.log(message);
                 },
-                onToolCall: (name, args) => {
-                    console.log(name, args);
-                },
             },
             adapters: [
                 codeAdapter,
             ],
             tools: {},
             plugins: [
-                getToolsPlugin,
+                {
+                    plugin: getToolsPlugin
+                },
                 {
                     plugin: {
                         name: "time",

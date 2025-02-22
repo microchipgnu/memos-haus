@@ -1,18 +1,19 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
-import { Command as CommandIcon } from "lucide-react"
 import {
   CommandDialog,
-  CommandInput,
-  CommandList,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command"
-import { getMemos, Memo, searchMemos } from "@/lib/core/storage"
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
+import { useStorage } from "@/hooks/use-storage"
+import { Memo } from "@/lib/core/storage"
 import { DialogTitle } from "@radix-ui/react-dialog"
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
+import { Command as CommandIcon } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 
 interface SplitButtonProps {
   updateCount: number | string
@@ -29,8 +30,13 @@ export default function SplitButton({
   className = "",
   onMemoSelect,
 }: SplitButtonProps) {
+
+  const { memos, search } = useStorage();
+
+  console.log('______Memos:', memos)
+
   const [open, setOpen] = useState(false)
-  const [searchResults, setSearchResults] = useState<Memo[]>([])
+  const [searchResults, setSearchResults] = useState<Memo[]>(memos)
   const [query, setQuery] = useState("")
 
   // Only add keyboard shortcut handler for desktop version
@@ -50,17 +56,13 @@ export default function SplitButton({
 
   // Search memos when query changes
   useEffect(() => {
-    console.log('Search query changed:', query)
     if (query) {
-      const results = searchMemos(query)
-      console.log('Search results:', results)
-      setSearchResults(results)
+      const results = search(query);
+      setSearchResults(results);
     } else {
-      const allMemos = getMemos()
-      console.log('Getting all memos:', allMemos)
-      setSearchResults(allMemos)
+      setSearchResults(memos);
     }
-  }, [query])
+  }, [query, memos]);
 
   // Handle memo selection
   const handleMemoSelect = useCallback((memo: Memo) => {
@@ -96,7 +98,7 @@ export default function SplitButton({
                 key={memo.id}
                 onSelect={() => handleMemoSelect(memo)}
               >
-                {memo.name}
+                {memo.id}
               </CommandItem>
             ))}
           </CommandGroup>

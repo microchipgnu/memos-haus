@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
         const content = body.content;
         const inputs = body.inputs;
 
-        const aimDoc = createAim(content, files, inputs, signal);
+        const aimDoc = createAim(content, files, signal);
 
         // Create a TransformStream for streaming
         const stream = new TransformStream();
@@ -34,8 +34,7 @@ export async function POST(request: NextRequest) {
                 const encoder = new TextEncoder();
                 
                 for await (const chunk of aimDoc.executeWithGenerator({ 
-                    input: body.inputs,
-                    signal 
+                    inputs 
                 })) {
                     if (signal.aborted) {
                         throw new Error('Request aborted');

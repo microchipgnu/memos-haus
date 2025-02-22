@@ -1,36 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { Conversation } from "@/components/conversation"
 import { EditorDialog } from "@/components/editor-dialog"
-import { CodeFile } from "@/lib/filesystem"
+import { Memo } from "@/lib/core/storage"
+import { useState } from "react"
+import { useStorage } from "@/hooks/use-storage"
 
-interface FileEditorProps {
-  files: CodeFile[]
-}
-
-export function FileEditor({ files }: FileEditorProps) {
-  const [selectedFile, setSelectedFile] = useState<CodeFile | null>(null);
-  const [code, setCode] = useState("");
+export function FileEditor() {
+  const { memos } = useStorage();
+  const [selectedFile, setSelectedFile] = useState<Memo | null>(null);
   const [result, setResult] = useState("");
   const [isRunning, setIsRunning] = useState(false);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value && selectedFile) {
-      setCode(value);
+      setSelectedFile({
+        ...selectedFile,
+        content: value
+      });
     }
   }
 
   const handleRun = async (inputs?: Record<string, any>) => {
     setIsRunning(true);
     setResult(""); // Clear previous results
-    
+
     try {
-      const response = await fetch('/api/agent', {
+      const response = await fetch('/api/aim', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content: code, inputs: inputs, files: files }),
+        body: JSON.stringify({ content: selectedFile?.content, inputs: inputs, files: memos }),
       });
 
       if (!response.ok) {
@@ -46,7 +47,6 @@ export function FileEditor({ files }: FileEditorProps) {
 
       while (true) {
         const { done, value } = await reader.read();
-        
         if (done) {
           break;
         }
@@ -63,25 +63,24 @@ export function FileEditor({ files }: FileEditorProps) {
     }
   }
 
-  const openFile = (file: CodeFile) => {
-    setSelectedFile(file);
-    setCode(file.content);
+  const openFile = (memo: Memo) => {
+    console.log('_____Memo OPEN:', memo)
+    setSelectedFile(memo);
     setResult("");
     setIsRunning(false);
   }
 
   const closeFile = () => {
     setSelectedFile(null);
-    setCode("");
     setResult("");
     setIsRunning(false);
   }
 
   return (
     <>
+      <Conversation onMemoSelect={openFile} />
       <EditorDialog
-        file={selectedFile}
-        code={code}
+        memo={selectedFile}
         result={result}
         isRunning={isRunning}
         onClose={closeFile}

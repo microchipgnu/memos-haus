@@ -6,6 +6,7 @@ import Voice from "./voice"
 import SplitButton from "./SplitButton"
 import AnimatedLogo from "@/components/AnimatedLogo"
 import Image from "next/image"
+import { Memo } from "@/lib/core/storage"
 
 // Import icons from lucide-react
 import { Activity, Ear, Loader2 } from "lucide-react"
@@ -20,6 +21,7 @@ export interface MicrophoneProps {
   conversationStatus?: string  // or a more specific type if you want
   isSpeaking?: boolean
   isIngesting?: boolean
+  onMemoSelect?: (memo: Memo) => void
 }
 
 export default function Microphone({
@@ -30,6 +32,7 @@ export default function Microphone({
   onSpeakClick = () => console.log("Speak button clicked"),
   className = "",
   isIngesting = false,
+  onMemoSelect = () => console.log("Memo selected"),
 }: MicrophoneProps) {
   // Decide icon colors based on the statusText
   function getIconColors(status: string) {
@@ -61,6 +64,7 @@ export default function Microphone({
           updateCount={updateCount}
           commandShortcut={commandShortcut}
           mobile={isMobile}
+          onMemoSelect={onMemoSelect}
         />
       </div>
     </div>

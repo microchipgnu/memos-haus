@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import type { CodeFile } from "@/lib/filesystem"
+import { useStorage } from "@/hooks/use-storage"
+import { Memo } from "@/lib/core/storage"
 import { configurePrismSyntax } from "@/lib/prism"
 import MonacoEditor from '@monaco-editor/react'
 import React from "react"
 import yaml from 'yaml'
 
 interface EditorDialogProps {
-    file: CodeFile | null
-    code: string
+    memo: Memo | null
     result: string
     isRunning: boolean
     onClose: () => void
@@ -18,8 +18,7 @@ interface EditorDialogProps {
 }
 
 export function EditorDialog({
-    file,
-    code,
+    memo,
     result,
     isRunning,
     onClose,
@@ -27,26 +26,34 @@ export function EditorDialog({
     onRun,
     onBack
 }: EditorDialogProps) {
-    if (!file) return null;
+    const { saveMemo } = useStorage();
 
     const [showInputDialog, setShowInputDialog] = React.useState(false);
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const [inputValues, setInputValues] = React.useState<Record<string, any>>({});
     const resultRef = React.useRef<HTMLDivElement>(null);
+    const [hasChanges, setHasChanges] = React.useState(false);
+    const [currentCode, setCurrentCode] = React.useState<string | undefined>(undefined);
+
+    React.useEffect(() => {
+        if (memo?.content) {
+            setCurrentCode(memo.content);
+        }
+    }, [memo?.content]);
 
     // Parse frontmatter if present and extract input fields
-    const hasFrontmatter = code.trim().startsWith('---');
+    const hasFrontmatter = memo?.content.trim().startsWith('---');
     const frontmatterInputs = React.useMemo(() => {
         if (!hasFrontmatter) return null;
-        
+
         try {
             // Extract content between first two --- markers
-            const matches = code.match(/^---\n([\s\S]*?)\n---/);
+            const matches = memo?.content.match(/^---\n([\s\S]*?)\n---/);
             if (!matches) return null;
-            
+
             const frontmatterContent = matches[1];
             const parsed = yaml.parse(frontmatterContent);
-            
+
             // Check if input field exists and is an array
             if (!parsed?.input || !Array.isArray(parsed.input)) {
                 return null;
@@ -61,10 +68,10 @@ export function EditorDialog({
                 default?: any;
             }) => {
                 if (typeof field !== 'object') return null;
-                
+
                 // Ensure required properties exist
                 if (!field.type || !field.name) return null;
-                
+
                 return {
                     type: field.type,
                     name: field.name,
@@ -73,14 +80,14 @@ export function EditorDialog({
                     default: field.default
                 };
             }).filter(Boolean);
-            
+
             return inputs.length > 0 ? inputs : null;
-            
+
         } catch (e) {
             console.error('Error parsing frontmatter:', e);
             return null;
         }
-    }, [code, hasFrontmatter]);
+    }, [memo?.content, hasFrontmatter]);
 
     const handleRunClick = () => {
         if (frontmatterInputs) {
@@ -93,6 +100,25 @@ export function EditorDialog({
     const handleInputSubmit = () => {
         setShowInputDialog(false);
         onRun(inputValues);
+    };
+
+    const handleCodeChange = (value: string | undefined) => {
+        if (value) {
+            setCurrentCode(value);
+            setHasChanges(value !== memo?.content);
+            onCodeChange(value);
+        }
+    };
+
+    const handleSaveChanges = () => {
+        if (memo && currentCode) {
+            saveMemo({
+                id: memo.id,
+                content: currentCode,
+                name: memo.name
+            });
+            setHasChanges(false);
+        }
     };
 
     // Auto-scroll to bottom when new content arrives
@@ -113,10 +139,10 @@ export function EditorDialog({
 
     return (
         <>
-            <Dialog open={file !== null} onOpenChange={(open) => !open && onClose()}>
+            <Dialog open={memo !== null} onOpenChange={(open) => !open && onClose()}>
                 <DialogContent className="max-w-4xl bg-gradient-to-br from-gray-900 via-zinc-900 to-black">
                     <DialogTitle className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-zinc-400 mb-4">
-                        {file.path}
+                        {memo?.id}
                     </DialogTitle>
 
                     <div className={`relative h-[70vh] ${isRunning ? 'bg-purple-500/5 transition-colors duration-1000' : ''}`}>
@@ -125,8 +151,8 @@ export function EditorDialog({
                                 height="100%"
                                 defaultLanguage="aim"
                                 theme="aim-dark"
-                                value={code}
-                                onChange={onCodeChange}
+                                value={currentCode}
+                                onChange={handleCodeChange}
                                 options={{
                                     minimap: { enabled: false },
                                     fontSize: 14,
@@ -310,12 +336,20 @@ export function EditorDialog({
                         )}
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-4 flex justify-end space-x-2">
+                        {hasChanges && (
+                            <Button
+                                onClick={handleSaveChanges}
+                                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold hover:from-green-600 hover:to-emerald-700"
+                            >
+                                Save Changes
+                            </Button>
+                        )}
                         {!result || isRunning ? (
                             <Button
                                 onClick={handleRunClick}
                                 disabled={isRunning}
-                                className={`bg-gradient-to-r from-gray-400 to-zinc-400 text-black font-semibold hover:from-gray-500 hover:to-zinc-500 ${isRunning ? 'animate-pulse' : ''}`}
+                                className={`bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold hover:from-blue-600 hover:to-indigo-700 ${isRunning ? 'animate-pulse' : ''}`}
                             >
                                 {isRunning ? (
                                     <>
@@ -331,7 +365,7 @@ export function EditorDialog({
                         ) : (
                             <Button
                                 onClick={onBack}
-                                className="bg-gradient-to-r from-gray-400 to-zinc-400 text-black font-semibold hover:from-gray-500 hover:to-zinc-500"
+                                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold hover:from-blue-600 hover:to-indigo-700"
                             >
                                 Back to Code
                             </Button>
@@ -375,7 +409,7 @@ export function EditorDialog({
                             <Button onClick={() => setShowInputDialog(false)} variant="outline">
                                 Cancel
                             </Button>
-                            <Button 
+                            <Button
                                 onClick={handleInputSubmit}
                                 className="bg-gradient-to-r from-gray-400 to-zinc-400 text-black font-semibold hover:from-gray-500 hover:to-zinc-500"
                             >
