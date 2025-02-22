@@ -1,3 +1,82 @@
+# memos
+
+mem**os** stems from the word "memo" which is short for memorandum and OS which is short for operating system. The goal of memos is to create an operating system for your mind.
+
+The goal of this project is to let users talk freely about their thoughts and ideas with AI agents that then organize their thoughts and ideas into a coherent structure.
+
+The kernel of the mem**os** are readable, editable and interconnected Markdown files with a twist, they can contain actions too.
+
+The UI is inspired by Teenage Engineering's products.
+
+ADD IMAGES HERE
+
+## Tech Stack
+
+- Next.js
+- Tailwind CSS
+- Shadcn UI
+- ElevenLabs Conversational AI
+- AIM
+- Vercel AI SDK
+
+### AIM
+
+AIM is a language [microchipgnu](https://x.com/microchipgnu) created. It is an AI-enhaced markup language inspired by Markdown and Markdoc. 
+
+### Core Agent
+
+At the end of a session, the user shares their current memos state with the core agent which in turn analyzes everything and then creates a new state.
+
+#### Generates a plan
+
+#### Executes the plan
+#### Shares the new state
+
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant generateAIResponse
+    participant generatePlan
+    participant generateChanges
+    participant OpenAI
+
+    Client->>generateAIResponse: messages[], memos[]
+    
+    generateAIResponse->>generatePlan: Generate implementation plan
+    generatePlan->>OpenAI: Generate object with planSchema
+    OpenAI-->>generatePlan: Return plan object
+    generatePlan-->>generateAIResponse: Return plan
+    
+    Note over generateAIResponse: If no files in plan,<br/>create default memo
+
+    generateAIResponse->>generateChanges: Generate changes for each file
+    
+    loop For each file in plan
+        generateChanges->>OpenAI: Generate initial content
+        OpenAI-->>generateChanges: Return content
+        
+        loop Quality improvement (max 3 iterations)
+            generateChanges->>OpenAI: Evaluate content
+            OpenAI-->>generateChanges: Return evaluation
+            
+            alt Quality criteria not met
+                generateChanges->>OpenAI: Generate improved content
+                OpenAI-->>generateChanges: Return improved content
+            end
+        end
+    end
+    
+    generateChanges-->>generateAIResponse: Return changes array
+    
+    Note over generateAIResponse: Convert changes to<br/>files format
+    
+    generateAIResponse-->>Client: Return {files}
+```
+
+---
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
