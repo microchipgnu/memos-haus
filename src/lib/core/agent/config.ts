@@ -7,6 +7,6 @@ export const providers = {
 }
 
 export const models = {
-    o3Mini: providers.openai('o3-mini'),
-    gpt4o: providers.openai('gpt-4o'),
+    reasoning: providers.openai('o3-mini'),
+    writing: providers.openai('gpt-4o'),
 }

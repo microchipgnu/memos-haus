@@ -29,7 +29,7 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
 
         // Initial content generation
         const { text: initialContent } = await generateText({
-            model: models.o3Mini,
+            model: models.reasoning,
             system: systemPrompt,
             prompt: `Implement the changes for ${file.filePath} to support:
             ${file.purpose}
@@ -46,7 +46,7 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
             console.log('Starting iteration', JSON.stringify(iterations + 1, null, 2));
 
             const { object: evaluation } = await generateObject({
-                model: models.o3Mini,
+                model: models.reasoning,
                 schema: memoEvalSchema,
                 system: systemPrompt,
                 prompt: `Evaluate this memo content:
@@ -74,13 +74,13 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
             }
 
             const { text: improvedContent } = await generateText({
-                model: models.o3Mini,
+                model: models.writing,
                 system: systemPrompt,
                 prompt: `Improve this memo content based on the following feedback:
                 ${evaluation.specificIssues.join('\n')}
                 ${evaluation.improvementSuggestions.join('\n')}
 
-                DO NOT include any other text or questions.
+                DO NOT include any other text or questions. Follow the AIM syntax.
                 
                 Current content:
                 ${currentContent}`
@@ -91,12 +91,23 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
             iterations++;
         }
 
+
+        const { text: aimContent } = await generateText({
+            model: models.writing,
+            system: systemPrompt,
+            prompt: `Make sure to follow strict AIM syntax.
+            
+            Current content:
+            ${currentContent}`
+        });
+
+
         console.log('Finished processing file:', file.filePath);
         return {
             file,
             implementation: {
                 explanation: 'Generated with quality feedback loop',
-                code: currentContent
+                code: aimContent
             }
         };
     }));

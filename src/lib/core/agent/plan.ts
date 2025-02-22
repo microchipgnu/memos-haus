@@ -20,7 +20,7 @@ export async function generatePlan(messages: Array<{ message: string; source: Ro
     const systemPrompt = await writeAIM(messages, memos);
 
     const result = await generateObject({
-        model: models.o3Mini,
+        model: models.reasoning,
         schema: planSchema,
         system: systemPrompt,
         prompt: `Analyze this conversation and plan memo changes or new files to create:
