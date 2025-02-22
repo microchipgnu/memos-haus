@@ -11,6 +11,7 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command"
+import { getMemos, Memo, searchMemos } from "@/lib/core/storage"
 
 interface SplitButtonProps {
   updateCount: number | string
@@ -26,6 +27,8 @@ export default function SplitButton({
   className = "",
 }: SplitButtonProps) {
   const [open, setOpen] = useState(false)
+  const [searchResults, setSearchResults] = useState<Memo[]>([])
+  const [query, setQuery] = useState("")
 
   // Open the command dialog on Cmd/Ctrl+K
   useEffect(() => {
@@ -38,6 +41,20 @@ export default function SplitButton({
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
   }, [])
+
+  // Search memos when query changes
+  useEffect(() => {
+    console.log('Search query changed:', query)
+    if (query) {
+      const results = searchMemos(query)
+      console.log('Search results:', results)
+      setSearchResults(results)
+    } else {
+      const allMemos = getMemos()
+      console.log('Getting all memos:', allMemos)
+      setSearchResults(allMemos)
+    }
+  }, [query])
 
   return (
     <>
@@ -70,7 +87,9 @@ export default function SplitButton({
           <DialogTitle className="sr-only">Command</DialogTitle>
           <Command className="rounded-lg">
             <CommandInput
-              placeholder="Type a command or search..."
+              placeholder="Search memos..."
+              value={query}
+              onValueChange={setQuery}
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
                   const target = e.target as HTMLInputElement
@@ -82,14 +101,19 @@ export default function SplitButton({
               }}
             />
             <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup heading="Suggestions">
-                <CommandItem onSelect={() => console.log("Command Item 1 selected")}>
-                  Command Item 1
-                </CommandItem>
-                <CommandItem onSelect={() => console.log("Command Item 2 selected")}>
-                  Command Item 2
-                </CommandItem>
+              <CommandEmpty>No memos found.</CommandEmpty>
+              <CommandGroup heading="Commands">
+                {searchResults.map((memo) => (
+                  <CommandItem
+                    key={memo.id}
+                    onSelect={() => {
+                      console.log("Selected memo:", memo)
+                      setOpen(false)
+                    }}
+                  >
+                    {memo.name}
+                  </CommandItem>
+                ))}
               </CommandGroup>
             </CommandList>
           </Command>

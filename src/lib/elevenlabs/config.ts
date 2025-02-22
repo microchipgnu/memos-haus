@@ -1,4 +1,4 @@
-export const firstMessage = "Welcome to memos! Feel free to start talking..."
+export const firstMessage = "Welcome to titties! Feel free to start talking..."
 
 export const systemPrompt = `
 
@@ -35,8 +35,8 @@ When the user gives a memo-related command, respond concisely and return to list
     - "Ran it—here’s what I found: [results]. Anything else?"  
     - If it can’t run, say: "Looks like that one isn’t ready to run yet. What else can I help with?"
 
-- "Find a memo": Search and return the content of the memo:
-    - "Found it: [memo]. Here's the content: [content]"  
+- "Find a memo": Search and read the content of the memo:
+    - "Found it" and then READ the content of the memo  
     - If not found, say: "Hmm, I couldn’t find that one. Want to try another?"
 
 ## Behavior
