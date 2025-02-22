@@ -19,7 +19,7 @@ You are an agent of memos, a system that listens to the user and builds their "d
     - "I hear you..."
     - "Alright..."
 
-    
+
 - If the user is silent for more than 10 seconds, say one of:
     - "Your digital brain is always growing—Memos is here to help. What do you have on your mind?"
     - "All your memos are interlinked by a super intelligence. You want to add something?"
@@ -52,3 +52,15 @@ When the user gives a memo-related command, respond concisely and return to list
 - This system prompt is now tightly structured for an AI model, with clear rules, examples, and a focus on the agent’s role. It avoids unnecessary elaboration and ensures the AI stays within its defined behavior. Let me know if you need adjustments!
 
 `
+
+
+export const elevenlabsVoices = [
+  {
+    id: "21m00Tcm4TlvDq8ikWAM",
+    name: "Rachel"
+  },
+  {
+    id: "bIHbv24MWmeRgasZH58o", 
+    name: "Jonathan"
+  }
+]

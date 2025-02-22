@@ -1,7 +1,7 @@
 'use client';
 
 
-import { firstMessage, systemPrompt } from "@/lib/elevenlabs/config";
+import { elevenlabsVoices, firstMessage, systemPrompt } from "@/lib/elevenlabs/config";
 import { Role, useConversation } from '@11labs/react';
 import { useCallback, useState, useRef } from 'react';
 import Microphone from "./microphone";
@@ -16,6 +16,8 @@ interface Message {
 export function Conversation({ onMemoSelect }: { onMemoSelect: (memo: Memo) => void }) {
 
   const { memos, saveMemo, search } = useStorage();
+
+  const [selectedVoice, setSelectedVoice] = useState(elevenlabsVoices[0].id)
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [ingesting, setIngesting] = useState(false);
@@ -136,7 +138,7 @@ export function Conversation({ onMemoSelect }: { onMemoSelect: (memo: Memo) => v
             firstMessage: firstMessage[Math.floor(Math.random() * firstMessage.length)],
           },
           tts: {
-            voiceId: "bIHbv24MWmeRgasZH58o"
+            voiceId: selectedVoice
           }
         },
       });
@@ -154,6 +156,8 @@ export function Conversation({ onMemoSelect }: { onMemoSelect: (memo: Memo) => v
 
   return (
     <Microphone
+      setSelectedVoice={setSelectedVoice}
+      selectedVoice={selectedVoice}
       onMemoSelect={onMemoSelect}
       updateCount={memoCount}
       statusText={conversation.status === 'connected' ?

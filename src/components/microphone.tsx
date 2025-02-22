@@ -22,9 +22,13 @@ export interface MicrophoneProps {
   isSpeaking?: boolean
   isIngesting?: boolean
   onMemoSelect?: (memo: Memo) => void
+  setSelectedVoice?: (voice: string) => void
+  selectedVoice?: string
 }
 
 export default function Microphone({
+  setSelectedVoice,
+  selectedVoice,
   commandShortcut = "K",
   updateCount = 3.211,
   buttonText = "SPEAK",
@@ -57,7 +61,10 @@ export default function Microphone({
     <div className="flex items-center justify-between">
       <div className={`flex ${isMobile ? "gap-2" : "gap-4"}`}>
         <Info />
-        <Voice />
+        <Voice 
+          setSelectedVoice={setSelectedVoice ?? (() => {})} 
+          selectedVoice={selectedVoice ?? ''} 
+        />
       </div>
       <div>
         <SplitButton

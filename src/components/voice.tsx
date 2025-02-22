@@ -18,11 +18,12 @@ import {
 } from "@/components/ui/drawer"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { elevenlabsVoices } from "@/lib/elevenlabs/config"
 
-export default function Voice() {
+export default function Voice({ setSelectedVoice, selectedVoice }: { setSelectedVoice: (voice: string) => void, selectedVoice: string }) {
   const [open, setOpen] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false) // Start with false to avoid hydration issues
-  const [selectedVoice, setSelectedVoice] = useState("voice1")
+
 
   useEffect(() => {
     // Ensure window is available (client-side only)
@@ -38,18 +39,12 @@ export default function Voice() {
       onValueChange={setSelectedVoice}
       className="space-y-3 p-4"
     >
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="voice1" id="voice1" />
-        <Label htmlFor="voice1">Voice 1</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="voice2" id="voice2" />
-        <Label htmlFor="voice2">Voice 2</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="voice3" id="voice3" />
-        <Label htmlFor="voice3">Voice 3</Label>
-      </div>
+      {elevenlabsVoices.map(voice => (
+        <div key={voice.id} className="flex items-center space-x-2">
+          <RadioGroupItem value={voice.id} id={voice.id} />
+          <Label htmlFor={voice.id}>{voice.name}</Label>
+        </div>
+      ))}
     </RadioGroup>
   )
 
