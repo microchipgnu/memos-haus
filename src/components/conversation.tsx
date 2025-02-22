@@ -91,7 +91,7 @@ export function Conversation() {
 
       // Start the conversation with your agent
       await conversation.startSession({
-        agentId: 'SmaHfpnBVCDkYcXIxPVn',
+        agentId: 'Z0b5WwZMWetil3PQdgxf',
         overrides: {
           agent: {
             prompt: {
