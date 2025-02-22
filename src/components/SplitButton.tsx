@@ -33,8 +33,10 @@ export default function SplitButton({
   const [searchResults, setSearchResults] = useState<Memo[]>([])
   const [query, setQuery] = useState("")
 
-  // Add back just the keyboard shortcut handler
+  // Only add keyboard shortcut handler for desktop version
   useEffect(() => {
+    if (mobile) return; // Skip event listener for mobile version
+
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
@@ -44,7 +46,7 @@ export default function SplitButton({
 
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [])
+  }, [mobile]) // Add mobile as dependency
 
   // Search memos when query changes
   useEffect(() => {

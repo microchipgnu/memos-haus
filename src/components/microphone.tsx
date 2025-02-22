@@ -23,6 +23,22 @@ export default function Microphone({
   onSpeakClick = () => console.log("Speak button clicked"),
   className = "",
 }: MicrophoneProps) {
+  const renderControls = (isMobile = false) => (
+    <div className="flex items-center justify-between">
+      <div className={`flex ${isMobile ? 'gap-2' : 'gap-4'}`}>
+        <Info />
+        <Voice />
+      </div>
+      <div>
+        <SplitButton
+          updateCount={updateCount}
+          commandShortcut={commandShortcut}
+          mobile={isMobile}
+        />
+      </div>
+    </div>
+  )
+
   return (
     <>
       {/* ========== DESKTOP LAYOUT ========== */}
@@ -66,21 +82,7 @@ export default function Microphone({
                 {buttonText}
               </Button>
 
-              <div className="flex items-center justify-between">
-                {/* Left group: Info & Voice triggers */}
-                <div className="flex gap-4">
-                  <Info />
-                  <Voice />
-                </div>
-
-                {/* Right group: Split button (desktop version) */}
-                <div>
-                  <SplitButton
-                    updateCount={updateCount}
-                    commandShortcut={commandShortcut}
-                  />
-                </div>
-              </div>
+              {renderControls(false)}
             </div>
           </div>
         </div>
@@ -125,21 +127,7 @@ export default function Microphone({
               {buttonText}
             </Button>
 
-            <div className="flex items-center justify-between">
-              <div className="flex gap-2">
-                <Info />
-                <Voice />
-              </div>
-
-              {/* Mobile Split Button: Pass the mobile prop so the bottom half shows "OPEN" */}
-              <div>
-                <SplitButton
-                  updateCount={updateCount}
-                  commandShortcut={commandShortcut}
-                  mobile
-                />
-              </div>
-            </div>
+            {renderControls(true)}
           </div>
         </div>
       </div>
