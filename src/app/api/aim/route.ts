@@ -3,7 +3,7 @@ import { Memo } from "@/lib/core/storage";
 import { type RenderableTreeNode, renderers } from "@aim-sdk/core";
 import { type NextRequest, NextResponse } from 'next/server';
 
-export const maxDuration = 300;
+export const maxDuration = 800;
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {

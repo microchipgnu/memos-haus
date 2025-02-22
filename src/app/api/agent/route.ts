@@ -2,7 +2,7 @@ import { updateState } from '@/lib/core/agent/workflow';
 import { Role } from '@11labs/react';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const maxDuration = 300; // 5 minutes in seconds
+export const maxDuration = 800; // 5 minutes in seconds
 
 // Validate request body
 function validateRequest(messages: unknown): messages is Array<{ message: string; source: Role }> {
