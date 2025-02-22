@@ -14,18 +14,22 @@ export const planSchema = z.object({
 });
 
 export async function generatePlan(messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
-    console.log('Generating implementation plan with', memos.length, 'memos');
+    console.log('Generating implementation plan with', JSON.stringify(memos, null, 2));
     
-    // const systemPrompt = await getSystemPrompt(messages, memos);
-
     const result = await generateObject({
         model: config.openai('o3-mini'),
         schema: planSchema,
         prompt: `Analyze this conversation and plan memo changes:
-        Messages: ${JSON.stringify(messages)}
-        Current Memos: ${JSON.stringify(memos)}`
+        
+        ## Messages
+
+        ${JSON.stringify(messages)}
+
+        ## Current Memos
+
+         ${JSON.stringify(memos)}`
     });
 
-    console.log('Generated plan:', result);
+    console.log('Generated plan:', JSON.stringify(result, null, 2));
     return result;
 }

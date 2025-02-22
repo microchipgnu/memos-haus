@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Memo } from "../storage";
 import { config } from "./config";
 import { planSchema } from "./plan";
+import { writeAIM } from "./write-aim";
 
 const memoEvalSchema = z.object({
     qualityScore: z.number(),
@@ -15,13 +16,13 @@ const memoEvalSchema = z.object({
 });
 
 export async function generateChanges(plan: z.infer<typeof planSchema>, messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
-    console.log('Generating changes for plan:', plan);
+    console.log('Generating changes for plan:', JSON.stringify(plan, null, 2));
     console.log(memos)
 
-    // const systemPrompt = await getSystemPrompt(messages, memos);
+    const systemPrompt = await writeAIM(messages, memos);
 
     const changes = await Promise.all(plan.files.map(async file => {
-        console.log('Processing file:', file);
+        console.log('Processing file:', JSON.stringify(file, null, 2));
 
         let currentContent = '';
         let iterations = 0;
@@ -30,7 +31,7 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
         // Initial content generation
         const { text: initialContent } = await generateText({
             model: config.openai('o3-mini'),
-            // system: systemPrompt,
+            system: systemPrompt,
             prompt: `Implement the changes for ${file.filePath} to support:
             ${file.purpose}
             
@@ -43,12 +44,12 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
 
         // Quality improvement loop
         while (iterations < MAX_ITERATIONS) {
-            console.log('Starting iteration', iterations + 1);
+            console.log('Starting iteration', JSON.stringify(iterations + 1, null, 2));
 
             const { object: evaluation } = await generateObject({
                 model: config.openai('o3-mini'),
                 schema: memoEvalSchema,
-                // system: systemPrompt,
+                system: systemPrompt,
                 prompt: `Evaluate this memo content:
                 ${currentContent}
                 
@@ -59,7 +60,7 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
                 4. Purpose fulfillment`
             });
 
-            console.log('Content evaluation:', evaluation);
+            console.log('Content evaluation:', JSON.stringify(evaluation, null, 2));
 
             if (
                 evaluation.qualityScore >= 8 &&
@@ -73,7 +74,7 @@ export async function generateChanges(plan: z.infer<typeof planSchema>, messages
 
             const { text: improvedContent } = await generateText({
                 model: config.openai('o3-mini'),
-                // system: systemPrompt,
+                system: systemPrompt,
                 prompt: `Improve this memo content based on the following feedback:
                 ${evaluation.specificIssues.join('\n')}
                 ${evaluation.improvementSuggestions.join('\n')}

@@ -6,12 +6,9 @@ import { Role } from "@11labs/client";
 export async function generateAIResponse(messages: Array<{ message: string; source: Role }>, memos: Memo[]) {
     console.log('Generating AI response');
     
-    // const systemPrompt = await getSystemPrompt(messages, memos);
-    console.log('Got system prompt');
-    
     // First generate implementation plan
     const plan = await generatePlan(messages, memos);
-    console.log('Generated implementation plan:', plan);
+    console.log('Generated implementation plan:', JSON.stringify(plan, null, 2));
 
     let planObject = plan.object;
     if (!planObject || !planObject.files || planObject.files.length === 0) {
@@ -29,7 +26,7 @@ export async function generateAIResponse(messages: Array<{ message: string; sour
     
     // Then generate specific changes
     const changes = await generateChanges(planObject, messages, memos);
-    console.log('Generated changes:', changes);
+    console.log('Generated changes:', JSON.stringify(changes, null, 2));
 
     // Convert changes to final response format
     const files = changes.map(change => ({
@@ -38,6 +35,6 @@ export async function generateAIResponse(messages: Array<{ message: string; sour
         content: change.implementation.code
     }));
 
-    console.log('Mapped changes to files format:', files);
+    console.log('Mapped changes to files format:', JSON.stringify(files, null, 2));
     return { files };
 }

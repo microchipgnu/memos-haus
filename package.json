@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build", 
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "manual-run": "mkdir -p runs && bun run src/lib/core/agent/manual-run.ts > runs/run_$(date +%s)_$(date '+%Y-%m-%d_%H-%M-%S').txt"
   },
   "dependencies": {
     "@11labs/client": "^0.0.7",
