@@ -1,3 +1,5 @@
+![gh_cover](gh_cover.png)
+
 # memos
 
 mem**os** stems from the word "memo" which is short for memorandum and OS which is short for operating system. The goal of memos is to create an operating system for your mind.
@@ -7,8 +9,6 @@ The goal of this project is to let users talk freely about their thoughts and id
 The kernel of the mem**os** are readable, editable and interconnected Markdown files with a twist, they can contain actions too.
 
 The UI is inspired by Teenage Engineering's products.
-
-ADD IMAGES HERE
 
 ## Tech Stack
 
@@ -21,17 +21,11 @@ ADD IMAGES HERE
 
 ### AIM
 
-AIM is a language [microchipgnu](https://x.com/microchipgnu) created. It is an AI-enhaced markup language inspired by Markdown and Markdoc. 
+[AIM](https://aim.tools) is a language [microchipgnu](https://x.com/microchipgnu) created. It is an AI-enhaced markup language inspired by Markdown and Markdoc. 
 
 ### Core Agent
 
 At the end of a session, the user shares their current memos state with the core agent which in turn analyzes everything and then creates a new state.
-
-#### Generates a plan
-
-#### Executes the plan
-#### Shares the new state
-
 
 ```mermaid
 sequenceDiagram
