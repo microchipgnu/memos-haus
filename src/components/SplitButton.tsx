@@ -126,15 +126,15 @@ function ButtonContent({
       onClick={onClick}
       className={`group w-14 h-14 rounded-md overflow-hidden flex flex-col ${className}`}
     >
-      <div className="flex-1 bg-[#FC7434] flex items-center justify-center text-xs font-black tracking-wide text-white transition-colors group-hover:bg-[#FC7434] group-hover:text-white">
+      <div className="flex-1 w-full bg-[#FC7434] flex items-center justify-center text-xs font-black tracking-wide text-white transition-colors group-hover:bg-[#FC7434] group-hover:text-white">
         {updateCount}
       </div>
       {mobile ? (
-        <div className="flex-1 bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-medium transition-colors group-hover:bg-[#FC7434] group-hover:text-white">
+        <div className="flex-1 w-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-medium transition-colors group-hover:bg-[#FC7434] group-hover:text-white">
           OPEN
         </div>
       ) : (
-        <div className="flex-1 bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-medium transition-colors group-hover:bg-[#FC7434] group-hover:text-white">
+        <div className="flex-1 w-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-medium transition-colors group-hover:bg-[#FC7434] group-hover:text-white">
           <CommandIcon className="w-4 h-4" />
           <span className="ml-1">{commandShortcut}</span>
         </div>
