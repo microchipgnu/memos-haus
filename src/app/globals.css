@@ -150,4 +150,8 @@
   body {
     @apply bg-background text-foreground;
   }
+  ::selection {
+    background-color: #FEE3D6;
+    color: #FC7434;
+  }
 }
