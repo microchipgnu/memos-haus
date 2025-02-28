@@ -21,6 +21,7 @@ import { useEffect, useState } from "react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { elevenlabsVoices } from "@/lib/elevenlabs/config"
+import { templates } from "@/lib/templates"
 
 export default function Info() {
   const [open, setOpen] = useState(false)
@@ -173,6 +174,25 @@ export default function Info() {
       <p className="text-sm text-gray-500">Install these templates to your memos collection.</p>
       
       <div className="grid grid-cols-1 gap-4 mt-4">
+      {Object.entries(templates).map(([key, template]) => (
+          <div key={key} className="border border-gray-200 rounded-lg p-4 hover:border-[#FC7434] transition-colors">
+            <h4 className="font-medium text-black mb-2">{template.name}</h4>
+            <p className="text-gray-500 text-sm mb-3">{template.description}</p>
+            <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded mb-3 max-h-24 overflow-y-auto">
+              <pre className="whitespace-pre-wrap">
+                {template.content}
+              </pre>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="w-full text-xs border-gray-300 hover:bg-gray-100 hover:text-gray-900"
+              onClick={() => handleAddTemplate(template.content, template.name)}
+            >
+              <Plus size={14} className="mr-1" /> Add to Memos
+            </Button>
+          </div>
+        ))}
         <div className="border border-gray-200 rounded-lg p-4 hover:border-[#FC7434] transition-colors">
           <h4 className="font-medium text-black mb-2">Daily Journal</h4>
           <p className="text-gray-500 text-sm mb-3">A template for daily reflections and planning.</p>

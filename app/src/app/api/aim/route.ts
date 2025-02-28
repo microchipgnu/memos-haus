@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
         console.log("INPUTS:", inputs)
 
-        const aimDoc = createAim(content, aimFiles, signal, context);
+        const aimDoc = await createAim(content, aimFiles, signal, context);
 
         // Create a TransformStream for streaming
         const stream = new TransformStream();
