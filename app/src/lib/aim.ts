@@ -5,6 +5,7 @@ import { getOnChainTools } from "@goat-sdk/adapter-vercel-ai";
 import { zeroEx } from "@goat-sdk/plugin-0x";
 import { erc20 } from "@goat-sdk/plugin-erc20";
 import { viem } from "@goat-sdk/wallet-viem";
+import { Sandbox } from "@e2b/code-interpreter";
 import { z } from "zod";
 
 export function createAim(content: string, files: { path: string; content: string }[], abortSignal: AbortSignal, context: { accountDetails: string }) {
@@ -35,7 +36,19 @@ export function createAim(content: string, files: { path: string; content: strin
                 },
             },
             adapters: [
-                codeAdapter,
+                {
+                    type: "code",
+                    handlers: {
+                        eval: async ({ code, language, variables }) => {
+                            const sbx = await Sandbox.create({
+                                apiKey: process.env.E2B_API_KEY || "", logger: console
+                            });
+                            const execution = await sbx.runCode(code, { language });
+                            await sbx.kill();
+                            return execution.toJSON();
+                        }
+                    }
+                }
             ],
             tools: {
                 accountDetails: {

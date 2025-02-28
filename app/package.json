@@ -16,6 +16,7 @@
     "@aim-sdk/adapters-code-e2b": "^0.0.3",
     "@aim-sdk/core": "^0.0.31",
     "@aim-sdk/plugins-get-tools": "^0.0.2",
+    "@e2b/code-interpreter": "^1.0.4",
     "@goat-sdk/adapter-vercel-ai": "^0.2.8",
     "@goat-sdk/plugin-0x": "^0.1.5",
     "@goat-sdk/plugin-erc20": "^0.2.10",
