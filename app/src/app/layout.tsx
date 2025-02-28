@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ContextProvider from "@/lib/reown/provider";
+import { cookies, headers } from "next/headers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,20 +19,27 @@ export const metadata: Metadata = {
   description: "your digital brain",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const headersList = await headers();
+  const cookies = headersList.get('cookie');
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <a href="https://aim.tools" target="_blank" rel="noopener noreferrer" className="fixed bottom-4 right-4 bg-black/80 text-white px-3 py-1.5 rounded-full text-sm">
+        <ContextProvider cookies={cookies}>
+
+          {children}
+          {/* <a href="https://aim.tools" target="_blank" rel="noopener noreferrer" className="fixed bottom-4 right-4 bg-black/80 text-white px-3 py-1.5 rounded-full text-sm">
             Powered by <span className="font-bold">AIM</span>
-        </a>
+          </a> */}
+        </ContextProvider>
       </body>
     </html>
   );

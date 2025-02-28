@@ -64,7 +64,6 @@ export function FileEditor() {
   }
 
   const openFile = (memo: Memo) => {
-    console.log('_____Memo OPEN:', memo)
     setSelectedFile(memo);
     setResult("");
     setIsRunning(false);

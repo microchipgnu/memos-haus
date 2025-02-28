@@ -3,10 +3,11 @@
 import { Button } from "@/components/ui/button"
 import Info from "./info"
 import Voice from "./voice"
-import SplitButton from "./SplitButton"
+import SplitButton from "./split-button"
 import AnimatedLogo from "@/components/AnimatedLogo"
 import Image from "next/image"
 import { Memo } from "@/lib/core/storage"
+import { useEffect, useRef, useState, useCallback, useMemo } from "react"
 
 // Import icons from lucide-react
 import { Activity, Ear, Loader2 } from "lucide-react"
@@ -18,12 +19,11 @@ export interface MicrophoneProps {
   statusText?: string
   onSpeakClick?: () => void
   className?: string
-  conversationStatus?: string  // or a more specific type if you want
-  isSpeaking?: boolean
   isIngesting?: boolean
   onMemoSelect?: (memo: Memo) => void
   setSelectedVoice?: (voice: string) => void
   selectedVoice?: string
+  onNewFile?: () => void
 }
 
 export default function Microphone({
@@ -37,9 +37,17 @@ export default function Microphone({
   className = "",
   isIngesting = false,
   onMemoSelect = () => console.log("Memo selected"),
+  onNewFile = () => console.log("New file button clicked"),
 }: MicrophoneProps) {
-  // Decide icon colors based on the statusText
-  function getIconColors(status: string) {
+  const [scrollPosition, setScrollPosition] = useState(0);
+  // Use a single ref for both status texts
+  const statusTextRef = useRef<HTMLSpanElement>(null);
+  const desktopStatusContainerRef = useRef<HTMLDivElement>(null);
+  const mobileStatusContainerRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<number | null>(null);
+  
+  // Decide icon colors based on the statusText - memoized to prevent recalculation
+  const getIconColors = useCallback((status: string) => {
     switch (status) {
       case "READY TO LISTEN":
         // Both icons gray
@@ -53,11 +61,51 @@ export default function Microphone({
       default:
         return { ear: "#4B4B4B", activity: "#4B4B4B" }
     }
-  }
+  }, []);
 
-  const { ear: earColor, activity: activityColor } = getIconColors(statusText)
+  const { ear: earColor, activity: activityColor } = useMemo(() => 
+    getIconColors(statusText), [statusText, getIconColors]);
 
-  const renderControls = (isMobile = false) => (
+  // Optimized animation using requestAnimationFrame instead of setInterval
+  const animateScroll = useCallback(() => {
+    if (!statusTextRef.current) return;
+    
+    // Calculate width of a single status text including brackets
+    const singleStatusWidth = statusTextRef.current.firstChild?.textContent?.length || 0;
+    const pixelsPerCharacter = 8; // Approximate width per character
+    const firstTextWidth = singleStatusWidth * pixelsPerCharacter;
+    
+    setScrollPosition(prev => {
+      // Create a seamless loop by resetting exactly when the first text has scrolled out
+      if (prev >= firstTextWidth) {
+        // Reset to create seamless loop effect
+        return prev - firstTextWidth;
+      }
+      // Increment by small amount for smooth animation
+      return prev + 0.5;
+    });
+    
+    // Continue the animation
+    animationRef.current = requestAnimationFrame(animateScroll);
+  }, []);
+
+  useEffect(() => {
+    // Reset scroll position when status text changes
+    setScrollPosition(0);
+    
+    // Start the animation
+    animationRef.current = requestAnimationFrame(animateScroll);
+    
+    // Cleanup function to cancel animation frame
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [statusText, animateScroll]);
+
+  // Memoize the controls to prevent unnecessary re-renders
+  const renderControls = useCallback((isMobile = false) => (
     <div className="flex items-center justify-between">
       <div className={`flex ${isMobile ? "gap-2" : "gap-4"}`}>
         <Info />
@@ -66,16 +114,32 @@ export default function Microphone({
           selectedVoice={selectedVoice ?? ''} 
         />
       </div>
-      <div>
+      <div className="flex gap-2">
         <SplitButton
           updateCount={updateCount}
-          commandShortcut={commandShortcut}
+          commandShortcut={"K"}
           mobile={isMobile}
           onMemoSelect={onMemoSelect}
         />
       </div>
     </div>
-  )
+  ), [setSelectedVoice, selectedVoice, updateCount, onMemoSelect]);
+
+  // Memoize the status text element to prevent re-renders
+  const renderStatusText = (isDesktop = true) => {
+    // Create three copies of text for seamless looping
+    const fullText = `[ ${statusText} ]   [ ${statusText} ]   [ ${statusText} ]`;
+    
+    return (
+      <span 
+        ref={isDesktop ? statusTextRef : undefined}
+        className="inline-block"
+        style={{ transform: `translateX(-${scrollPosition}px)` }}
+      >
+        {fullText}
+      </span>
+    );
+  };
 
   return (
     <>
@@ -94,10 +158,14 @@ export default function Microphone({
               <Loader2 className={isIngesting ? "animate-spin" : ""}  size={18} color={isIngesting ? "#ffffff" : "#4B4B4B"} />
             </div>
 
-            {/* Right: Status text */}
-            <span className="text-sm font-semibold tracking-wide whitespace-nowrap">
-              {statusText}
-            </span>
+            {/* Right: Status text with fixed width and scrolling */}
+            <div 
+              ref={desktopStatusContainerRef}
+              className="text-sm font-mono font-semibold tracking-wider whitespace-nowrap bg-black px-2 py-1 rounded shadow-inner overflow-hidden w-[140px]"
+              style={{ textShadow: "0 0 5px #FC7434" }}
+            >
+              {renderStatusText(true)}
+            </div>
           </div>
 
 
@@ -146,10 +214,14 @@ export default function Microphone({
               <Loader2 className={isIngesting ? "animate-spin" : ""}  size={18} color={isIngesting ? "#ffffff" : "#4B4B4B"} />
             </div>
 
-            {/* Right: Status text */}
-            <span className="text-xs font-semibold tracking-wide whitespace-nowrap">
-              {statusText}
-            </span>
+            {/* Right: Status text with fixed width and scrolling */}
+            <div 
+              ref={mobileStatusContainerRef}
+              className="text-xs font-mono font-semibold tracking-wider whitespace-nowrap bg-black px-1.5 py-0.5 rounded shadow-inner overflow-hidden w-[100px]"
+              style={{ textShadow: "0 0 3px #FC7434" }}
+            >
+              {renderStatusText(false)}
+            </div>
           </div>
 
 

@@ -12,7 +12,7 @@ import { useStorage } from "@/hooks/use-storage"
 import { Memo } from "@/lib/core/storage"
 import { DialogTitle } from "@radix-ui/react-dialog"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
-import { Command as CommandIcon } from "lucide-react"
+import { Command as CommandIcon, FileText, File } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 
 interface SplitButtonProps {
@@ -21,6 +21,8 @@ interface SplitButtonProps {
   mobile?: boolean
   className?: string
   onMemoSelect?: (memo: Memo) => void
+  onCreateFile?: (name: string) => void
+  onCreateDocument?: (name: string) => void
 }
 
 export default function SplitButton({
@@ -29,12 +31,14 @@ export default function SplitButton({
   mobile = false,
   className = "",
   onMemoSelect,
+  onCreateFile,
+  onCreateDocument,
 }: SplitButtonProps) {
 
   const { memos, search } = useStorage();
 
   const [open, setOpen] = useState(false)
-  const [searchResults, setSearchResults] = useState<Memo[]>(memos)
+  const [searchResults, setSearchResults] = useState<Memo[]>([])
   const [query, setQuery] = useState("")
 
   // Only add keyboard shortcut handler for desktop version
@@ -52,6 +56,11 @@ export default function SplitButton({
     return () => document.removeEventListener("keydown", down)
   }, [mobile]) // Add mobile as dependency
 
+  // Initialize search results with memos when component mounts or memos change
+  useEffect(() => {
+    setSearchResults(memos)
+  }, [memos])
+
   // Search memos when query changes
   useEffect(() => {
     if (query) {
@@ -60,7 +69,7 @@ export default function SplitButton({
     } else {
       setSearchResults(memos);
     }
-  }, [query, memos]);
+  }, [query, memos, search]);
 
   // Handle memo selection
   const handleMemoSelect = useCallback((memo: Memo) => {
@@ -68,6 +77,24 @@ export default function SplitButton({
     setOpen(false)
     setQuery("")
   }, [onMemoSelect])
+
+  // Handle creating a new file with the current query as the name
+  const handleCreateFile = useCallback(() => {
+    if (query.trim() && onCreateFile) {
+      onCreateFile(query.trim())
+      setOpen(false)
+      setQuery("")
+    }
+  }, [query, onCreateFile])
+
+  // Handle creating a new document with the current query as the name
+  const handleCreateDocument = useCallback(() => {
+    if (query.trim() && onCreateDocument) {
+      onCreateDocument(query.trim())
+      setOpen(false)
+      setQuery("")
+    }
+  }, [query, onCreateDocument])
 
   return (
     <>
@@ -89,7 +116,33 @@ export default function SplitButton({
           onValueChange={setQuery}
         />
         <CommandList>
-          <CommandEmpty>No memos found.</CommandEmpty>
+          <CommandEmpty>
+            <div className="py-2 px-2">
+              No memos found. 
+              {query.trim() && (
+                <div className="mt-2 flex flex-col gap-2">
+                  {onCreateFile && (
+                    <button 
+                      className="text-blue-500 hover:underline flex items-center"
+                      onClick={handleCreateFile}
+                    >
+                      <File className="w-4 h-4 mr-2" />
+                      Create file "{query}"
+                    </button>
+                  )}
+                  {onCreateDocument && (
+                    <button 
+                      className="text-green-500 hover:underline flex items-center"
+                      onClick={handleCreateDocument}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Create document "{query}"
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </CommandEmpty>
           <CommandGroup heading="Commands">
             {searchResults.map((memo) => (
               <CommandItem
@@ -100,6 +153,22 @@ export default function SplitButton({
               </CommandItem>
             ))}
           </CommandGroup>
+          {query.trim() && (
+            <CommandGroup heading="Actions">
+              {onCreateFile && (
+                <CommandItem onSelect={handleCreateFile}>
+                  <File className="w-4 h-4 mr-2" />
+                  Create new file: "{query}"
+                </CommandItem>
+              )}
+              {onCreateDocument && (
+                <CommandItem onSelect={handleCreateDocument}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Create new document: "{query}"
+                </CommandItem>
+              )}
+            </CommandGroup>
+          )}
         </CommandList>
       </CommandDialog>
     </>

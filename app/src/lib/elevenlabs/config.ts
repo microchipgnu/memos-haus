@@ -50,9 +50,7 @@ When the user gives a memo-related command, respond concisely and return to list
 - Assume you have tools to save, list, run, and find memos as needed.
 - Time your responses naturally: brief encouragement after 2-3 seconds, memo explanation after 10+ seconds of silence.
 - This system prompt is now tightly structured for an AI model, with clear rules, examples, and a focus on the agent’s role. It avoids unnecessary elaboration and ensures the AI stays within its defined behavior. Let me know if you need adjustments!
-
 `
-
 
 export const elevenlabsVoices = [
   {
