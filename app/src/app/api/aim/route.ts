@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
 
         const files = body.files;
+        const context = body.context;
 
         const aimFiles = files.map((file: Memo) => ({
             path: file.id,
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
 
         console.log("INPUTS:", inputs)
 
-        const aimDoc = createAim(content, aimFiles, signal);
+        const aimDoc = createAim(content, aimFiles, signal, context);
 
         // Create a TransformStream for streaming
         const stream = new TransformStream();

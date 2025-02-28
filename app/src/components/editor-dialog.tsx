@@ -29,7 +29,7 @@ export function EditorDialog({
     onRun,
     onBack
 }: EditorDialogProps) {
-    const { saveMemo } = useStorage()
+    const { saveMemo, removeMemo } = useStorage()
 
     const [showInputDialog, setShowInputDialog] = React.useState(false)
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -129,6 +129,13 @@ export function EditorDialog({
                 name: memo.name
             })
             setHasChanges(false)
+        }
+    }
+
+    const handleDeleteMemo = () => {
+        if (memo) {
+            removeMemo(memo.id)
+            onClose()
         }
     }
 
@@ -341,40 +348,50 @@ export function EditorDialog({
                 )}
             </div>
 
-            <div className="mt-4 flex justify-end space-x-2">
-                {hasChanges && (
+            <div className="mt-4 flex justify-between space-x-2">
+                <div>
                     <Button
-                        onClick={handleSaveChanges}
-                        className="bg-[#FC7434] hover:bg-[#CD5C27] text-white"
+                        onClick={handleDeleteMemo}
+                        className="bg-red-600 hover:bg-red-700 text-white rounded-lg h-9 px-4 tracking-wide font-medium text-sm"
                     >
-                        Save Changes
+                        Delete
                     </Button>
-                )}
-                {!result || isRunning ? (
-                    <Button
-                        onClick={handleRunClick}
-                        disabled={isRunning}
-                        className={`bg-[#FC7434] hover:bg-[#CD5C27] text-white ${isRunning ? 'animate-pulse' : ''}`}
-                    >
-                        {isRunning ? (
-                            <>
-                                <div className="loading mr-2">
-                                    <div />
-                                </div>
-                                Running...
-                            </>
-                        ) : (
-                            'Run Code'
-                        )}
-                    </Button>
-                ) : (
-                    <Button
-                        onClick={onBack}
-                        className="bg-[#FC7434] hover:bg-[#CD5C27] text-white"
-                    >
-                        Back to Code
-                    </Button>
-                )}
+                </div>
+                <div className="flex space-x-2">
+                    {hasChanges && (
+                        <Button
+                            onClick={handleSaveChanges}
+                            className="bg-[#FC7434] hover:bg-[#CD5C27] text-white rounded-lg h-9 px-4 tracking-wide font-medium text-sm"
+                        >
+                            Save Changes
+                        </Button>
+                    )}
+                    {!result || isRunning ? (
+                        <Button
+                            onClick={handleRunClick}
+                            disabled={isRunning}
+                            className={`h-9 px-4 tracking-wide font-medium text-sm bg-[#FC7434] hover:bg-[#CD5C27] text-white rounded-lg ${isRunning ? 'animate-pulse' : ''}`}
+                        >
+                            {isRunning ? (
+                                <>
+                                    <div className="loading mr-2">
+                                        <div />
+                                    </div>
+                                    Running...
+                                </>
+                            ) : (
+                                'Run Code'
+                            )}
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={onBack}
+                            className="h-9 px-4 tracking-wide font-medium text-sm bg-[#FC7434] hover:bg-[#CD5C27] text-white rounded-lg"
+                        >
+                            Back to Code
+                        </Button>
+                    )}
+                </div>
             </div>
         </>
     )
@@ -435,12 +452,12 @@ export function EditorDialog({
                             </div>
                         ))}
                         <div className="flex justify-end space-x-2 mt-4">
-                            <Button onClick={() => setShowInputDialog(false)} variant="outline">
+                            <Button onClick={() => setShowInputDialog(false)} variant="outline" className="h-8 px-3 text-sm">
                                 Cancel
                             </Button>
                             <Button
                                 onClick={handleInputSubmit}
-                                className="bg-[#FC7434] hover:bg-[#CD5C27] text-white"
+                                className="h-8 px-3 text-sm tracking-wide font-medium bg-[#FC7434] hover:bg-[#CD5C27] text-white rounded-lg"
                             >
                                 Run
                             </Button>

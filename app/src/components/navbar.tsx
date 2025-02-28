@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function Navbar() {
     return (
-      <nav className="fixed top-0 left-0 right-0 h-12 z-30">
+      <nav className="fixed bottom-0 left-0 right-0 h-12 z-30">
         <div className="h-full flex items-center justify-center">
           <Image 
             src="/memos-logo-typeface.svg" 

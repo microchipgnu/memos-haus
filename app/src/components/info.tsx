@@ -18,6 +18,9 @@ import { getMemos } from "@/lib/core/storage"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { BookOpen, HelpCircle, Info as InfoIcon, Plus, Settings as SettingsIcon } from "lucide-react"
 import { useEffect, useState } from "react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import { elevenlabsVoices } from "@/lib/elevenlabs/config"
 
 export default function Info() {
   const [open, setOpen] = useState(false)
@@ -27,6 +30,7 @@ export default function Info() {
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
   const [showDeletePrompt, setShowDeletePrompt] = useState(false)
   const { clearMemos, memos, saveMemo } = useStorage()
+  const [selectedVoice, setSelectedVoice] = useState(elevenlabsVoices[0]?.id || "")
 
   useEffect(() => {
     const updateSize = () => setIsDesktop(window.innerWidth >= 768)
@@ -141,7 +145,7 @@ export default function Info() {
       </p>
       <hr className="border-t border-gray-300" />
       <p>
-        Press <span style={{ color: "#000000" }} className="font-semibold">SPEAK</span> and say anything that you wish to record as a voice memo.
+        Press <span style={{ color: "#000000" }} className="font-semibold">START</span> and say anything that you wish to record as a voice memo.
       </p>
       <p>All your memos will be organized and maintained by AI Agents.</p>
       <p>
@@ -323,6 +327,24 @@ export default function Info() {
           </Button>
         )}
       </div>
+
+      <div className="space-y-2 pt-4 border-t border-gray-200">
+        <h3 className="text-lg font-medium">Voice Settings</h3>
+        <p className="text-sm text-gray-500">Select your preferred voice option</p>
+        
+        <RadioGroup
+          value={selectedVoice}
+          onValueChange={setSelectedVoice}
+          className="space-y-3 p-2"
+        >
+          {elevenlabsVoices.map(voice => (
+            <div key={voice.id} className="flex items-center space-x-2">
+              <RadioGroupItem value={voice.id} id={voice.id} />
+              <Label htmlFor={voice.id}>{voice.name}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
     </div>
   )
 
@@ -358,12 +380,12 @@ export default function Info() {
       <div>
         <h3 className="font-semibold text-black">Need more help?</h3>
         <p className="mt-2">
-          Contact us at{" "}
+          Contact me at{" "}
           <a
-            href="mailto:support@memos.app"
+            href="https://x.com/microchipgnu"
             className="hover:underline text-[#FC7434] hover:text-[#BF6236]"
           >
-            support@memos.app
+            @microchipgnu
           </a>
         </p>
       </div>
@@ -419,7 +441,7 @@ export default function Info() {
         className="w-14 h-14 p-0 text-xs font-medium"
         onClick={() => setOpen(true)}
       >
-        INFO
+        <span className="mt-1 text-[10px] font-medium">CONFIG</span>
       </Button>
 
       {isDesktop ? (

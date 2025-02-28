@@ -1,8 +1,13 @@
 import { aim, defaultRuntimeOptions } from "@aim-sdk/core"
 import { codeAdapter } from "@aim-sdk/adapters-code-e2b";
 import { getToolsPlugin } from "@aim-sdk/plugins-get-tools";
+import { getOnChainTools } from "@goat-sdk/adapter-vercel-ai";
+import { zeroEx } from "@goat-sdk/plugin-0x";
+import { erc20 } from "@goat-sdk/plugin-erc20";
+import { viem } from "@goat-sdk/wallet-viem";
+import { z } from "zod";
 
-export function createAim(content: string, files: { path: string; content: string }[], abortSignal: AbortSignal) {
+export function createAim(content: string, files: { path: string; content: string }[], abortSignal: AbortSignal, context: { accountDetails: string }) {
     return aim({
         content,
         options: {
@@ -32,7 +37,15 @@ export function createAim(content: string, files: { path: string; content: strin
             adapters: [
                 codeAdapter,
             ],
-            tools: {},
+            tools: {
+                accountDetails: {
+                    description: "Get account details",
+                    parameters: z.object({}),
+                    execute: async () => {
+                        return context.accountDetails;
+                    },
+                },
+            },
             plugins: [
                 {
                     plugin: getToolsPlugin

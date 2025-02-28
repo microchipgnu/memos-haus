@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import Info from "./info"
 import Voice from "./voice"
+import Wallet from "./wallet"
 import SplitButton from "./split-button"
 import AnimatedLogo from "@/components/AnimatedLogo"
 import Image from "next/image"
@@ -109,10 +110,7 @@ export default function Microphone({
     <div className="flex items-center justify-between">
       <div className={`flex ${isMobile ? "gap-2" : "gap-4"}`}>
         <Info />
-        <Voice 
-          setSelectedVoice={setSelectedVoice ?? (() => {})} 
-          selectedVoice={selectedVoice ?? ''} 
-        />
+        <Wallet />
       </div>
       <div className="flex gap-2">
         <SplitButton

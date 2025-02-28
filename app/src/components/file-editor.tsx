@@ -5,12 +5,14 @@ import { EditorDialog } from "@/components/editor-dialog"
 import { Memo } from "@/lib/core/storage"
 import { useState } from "react"
 import { useStorage } from "@/hooks/use-storage"
+import { useAccount } from "wagmi"
 
 export function FileEditor() {
   const { memos } = useStorage();
   const [selectedFile, setSelectedFile] = useState<Memo | null>(null);
   const [result, setResult] = useState("");
   const [isRunning, setIsRunning] = useState(false);
+  const { address, chainId, status, chain } = useAccount()
 
   const handleEditorChange = (value: string | undefined) => {
     if (value && selectedFile) {
@@ -31,7 +33,7 @@ export function FileEditor() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content: selectedFile?.content, inputs: inputs, files: memos }),
+        body: JSON.stringify({ content: selectedFile?.content, inputs: inputs, files: memos, context: { accountDetails: JSON.stringify({ address, chainId, status, chain }) } }),
       });
 
       if (!response.ok) {
