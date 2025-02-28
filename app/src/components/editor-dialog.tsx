@@ -36,7 +36,7 @@ export function EditorDialog({
     const [inputValues, setInputValues] = React.useState<Record<string, any>>({})
     const resultRef = React.useRef<HTMLDivElement>(null)
     const [hasChanges, setHasChanges] = React.useState(false)
-    const [currentCode, setCurrentCode] = React.useState<string | undefined>(undefined)
+    const [currentCode, setCurrentCode] = React.useState<string | undefined>(memo?.content || "")
     const [isDesktop, setIsDesktop] = React.useState(true)
 
     React.useEffect(() => {
@@ -44,13 +44,13 @@ export function EditorDialog({
         updateSize()
         window.addEventListener("resize", updateSize)
         return () => window.removeEventListener("resize", updateSize)
-    }, [])
+    }, [memo])
 
     React.useEffect(() => {
         if (memo?.content) {
             setCurrentCode(memo.content)
         }
-    }, [memo?.content])
+    }, [memo?.content, memo])
 
     // Parse frontmatter if present and extract input fields
     const hasFrontmatter = memo?.content.trim().startsWith('---')

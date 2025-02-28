@@ -1,5 +1,10 @@
 "use client"
 
+import { useCallback, useEffect, useState, useMemo } from "react"
+import { Command as CommandIcon, FileText, File } from "lucide-react"
+import { DialogTitle } from "@radix-ui/react-dialog"
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
+
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,11 +15,8 @@ import {
 } from "@/components/ui/command"
 import { useStorage } from "@/hooks/use-storage"
 import { Memo } from "@/lib/core/storage"
-import { DialogTitle } from "@radix-ui/react-dialog"
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
-import { Command as CommandIcon, FileText, File } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
 
+// Types
 interface SplitButtonProps {
   updateCount: number | string
   commandShortcut: string
@@ -25,157 +27,7 @@ interface SplitButtonProps {
   onCreateDocument?: (name: string) => void
 }
 
-export default function SplitButton({
-  updateCount,
-  commandShortcut,
-  mobile = false,
-  className = "",
-  onMemoSelect,
-  onCreateFile,
-  onCreateDocument,
-}: SplitButtonProps) {
-
-  const { memos, search } = useStorage();
-
-  const [open, setOpen] = useState(false)
-  const [searchResults, setSearchResults] = useState<Memo[]>([])
-  const [query, setQuery] = useState("")
-
-  // Only add keyboard shortcut handler for desktop version
-  useEffect(() => {
-    if (mobile) return; // Skip event listener for mobile version
-
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setOpen((open) => !open)
-      }
-    }
-
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [mobile]) // Add mobile as dependency
-
-  // Initialize search results with memos when component mounts or memos change
-  useEffect(() => {
-    setSearchResults(memos)
-  }, [memos])
-
-  // Search memos when query changes
-  useEffect(() => {
-    if (query) {
-      const results = search(query);
-      setSearchResults(results);
-    } else {
-      setSearchResults(memos);
-    }
-  }, [query, memos, search]);
-
-  // Handle memo selection
-  const handleMemoSelect = useCallback((memo: Memo) => {
-    onMemoSelect?.(memo)
-    setOpen(false)
-    setQuery("")
-  }, [onMemoSelect])
-
-  // Handle creating a new file with the current query as the name
-  const handleCreateFile = useCallback(() => {
-    if (query.trim() && onCreateFile) {
-      onCreateFile(query.trim())
-      setOpen(false)
-      setQuery("")
-    }
-  }, [query, onCreateFile])
-
-  // Handle creating a new document with the current query as the name
-  const handleCreateDocument = useCallback(() => {
-    if (query.trim() && onCreateDocument) {
-      onCreateDocument(query.trim())
-      setOpen(false)
-      setQuery("")
-    }
-  }, [query, onCreateDocument])
-
-  return (
-    <>
-      <ButtonContent
-        updateCount={updateCount}
-        commandShortcut={commandShortcut}
-        mobile={mobile}
-        className={className}
-        onClick={() => setOpen(true)}
-      />
-
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <VisuallyHidden>
-          <DialogTitle>Search Memos</DialogTitle>
-        </VisuallyHidden>
-        <CommandInput
-          placeholder="Search memos..."
-          value={query}
-          onValueChange={setQuery}
-        />
-        <CommandList>
-          <CommandEmpty>
-            <div className="py-2 px-2">
-              No memos found. 
-              {query.trim() && (
-                <div className="mt-2 flex flex-col gap-2">
-                  {onCreateFile && (
-                    <button 
-                      className="text-blue-500 hover:underline flex items-center"
-                      onClick={handleCreateFile}
-                    >
-                      <File className="w-4 h-4 mr-2" />
-                      Create file "{query}"
-                    </button>
-                  )}
-                  {onCreateDocument && (
-                    <button 
-                      className="text-green-500 hover:underline flex items-center"
-                      onClick={handleCreateDocument}
-                    >
-                      <FileText className="w-4 h-4 mr-2" />
-                      Create document "{query}"
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </CommandEmpty>
-          <CommandGroup heading="Commands">
-            {searchResults.map((memo) => (
-              <CommandItem
-                key={memo.id}
-                onSelect={() => handleMemoSelect(memo)}
-              >
-                {memo.id}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-          {query.trim() && (
-            <CommandGroup heading="Actions">
-              {onCreateFile && (
-                <CommandItem onSelect={handleCreateFile}>
-                  <File className="w-4 h-4 mr-2" />
-                  Create new file: "{query}"
-                </CommandItem>
-              )}
-              {onCreateDocument && (
-                <CommandItem onSelect={handleCreateDocument}>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Create new document: "{query}"
-                </CommandItem>
-              )}
-            </CommandGroup>
-          )}
-        </CommandList>
-      </CommandDialog>
-    </>
-  )
-}
-
-// Separate button content component
+// Component for button appearance
 function ButtonContent({
   updateCount,
   commandShortcut,
@@ -209,5 +61,188 @@ function ButtonContent({
         </div>
       )}
     </button>
+  )
+}
+
+// Main component
+export default function SplitButton({
+  updateCount,
+  commandShortcut,
+  mobile = false,
+  className = "",
+  onMemoSelect,
+  onCreateFile,
+  onCreateDocument,
+}: SplitButtonProps) {
+  // State
+  const { memos, search } = useStorage();
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState("")
+
+  // Debug flags
+  const hasQuery = !!query.trim();
+  const hasCreateFileHandler = !!onCreateFile;
+  const hasCreateDocHandler = !!onCreateDocument;
+  
+  // Log values in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && open) {
+      console.log('SplitButton Debug:', {
+        hasQuery,
+        hasCreateFileHandler,
+        hasCreateDocHandler,
+        memoCount: memos.length,
+        searchResults: !query ? memos : search(query)
+      });
+    }
+  }, [open, hasQuery, hasCreateFileHandler, hasCreateDocHandler, memos, query, search]);
+
+  // Memo search logic
+  const searchResults = useMemo(() => {
+    if (!query) return memos;
+    return search(query);
+  }, [query, memos, search]);
+
+  // Keyboard shortcut handler
+  useEffect(() => {
+    if (mobile) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setOpen((open) => !open)
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [mobile]);
+
+  // Action handlers
+  const handleMemoSelect = useCallback((memo: Memo) => {
+    onMemoSelect?.(memo)
+    setOpen(false)
+    setQuery("")
+  }, [onMemoSelect]);
+
+  const handleCreateFile = useCallback(() => {
+    if (query.trim() && onCreateFile) {
+      onCreateFile(query.trim())
+      setOpen(false)
+      setQuery("")
+    }
+  }, [query, onCreateFile]);
+
+  const handleCreateDocument = useCallback(() => {
+    if (query.trim() && onCreateDocument) {
+      onCreateDocument(query.trim())
+      setOpen(false)
+      setQuery("")
+    }
+  }, [query, onCreateDocument]);
+
+  // Always show the actions if there's a query and any handler
+  const showActions = hasQuery && (hasCreateFileHandler || hasCreateDocHandler);
+
+  return (
+    <>
+      <ButtonContent
+        updateCount={updateCount}
+        commandShortcut={commandShortcut}
+        mobile={mobile}
+        className={className}
+        onClick={() => setOpen(true)}
+      />
+
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <VisuallyHidden>
+          <DialogTitle>Search Memos</DialogTitle>
+        </VisuallyHidden>
+        
+        <CommandInput
+          placeholder="Type to search or create..."
+          value={query}
+          onValueChange={setQuery}
+          autoFocus
+        />
+        
+        <CommandList className="max-h-[300px]">
+          <CommandEmpty>
+            <div className="py-2 px-2">
+              No memos found. 
+              {hasQuery && (
+                <div className="mt-2 flex flex-col gap-2">
+                  {hasCreateFileHandler && (
+                    <button 
+                      className="text-blue-500 hover:underline flex items-center"
+                      onClick={() => {
+                        console.log("Create file button clicked");
+                        onCreateFile(query.trim());
+                        setOpen(false);
+                        setQuery("");
+                      }}
+                    >
+                      <File className="w-4 h-4 mr-2" />
+                      Create file "{query.trim()}"
+                    </button>
+                  )}
+                  {hasCreateDocHandler && (
+                    <button 
+                      className="text-green-500 hover:underline flex items-center"
+                      onClick={() => {
+                        console.log("Create document button clicked");
+                        onCreateDocument(query.trim());
+                        setOpen(false);
+                        setQuery("");
+                      }}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Create document "{query.trim()}"
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </CommandEmpty>
+          
+          {searchResults.length > 0 && (
+            <CommandGroup heading="Memos">
+              {searchResults.map((memo) => (
+                <CommandItem
+                  key={memo.id}
+                  onSelect={() => handleMemoSelect(memo)}
+                >
+                  {memo.id}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+          
+          {/* Force the Actions section to be visible when appropriate */}
+          {hasQuery && (
+            <CommandGroup heading="Actions">
+              {hasCreateFileHandler && (
+                <CommandItem 
+                  onSelect={handleCreateFile}
+                  className="text-blue-500"
+                >
+                  <File className="w-4 h-4 mr-2" />
+                  Create new file: "{query.trim()}"
+                </CommandItem>
+              )}
+              {hasCreateDocHandler && (
+                <CommandItem 
+                  onSelect={handleCreateDocument}
+                  className="text-green-500"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Create new document: "{query.trim()}"
+                </CommandItem>
+              )}
+            </CommandGroup>
+          )}
+        </CommandList>
+      </CommandDialog>
+    </>
   )
 }

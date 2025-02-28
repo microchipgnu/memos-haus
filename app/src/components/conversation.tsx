@@ -166,9 +166,13 @@ export function Conversation({ onMemoSelect }: { onMemoSelect: (memo: Memo) => v
       }
       onSpeakClick={conversation.status === 'connected' ? stopConversation : startConversation}
       buttonText={conversation.status === 'connected' ? 'STOP' : 'START'}
-
-      conversationStatus={conversation.status}
-      isSpeaking={conversation.isSpeaking}
+      onNewFile={(fileName: string) => {
+        saveMemo({
+          id: fileName,
+          name: fileName,
+          content: "Add your notes here..."
+        });
+      }}
       isIngesting={ingesting}
     />
   );

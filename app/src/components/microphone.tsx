@@ -23,7 +23,7 @@ export interface MicrophoneProps {
   onMemoSelect?: (memo: Memo) => void
   setSelectedVoice?: (voice: string) => void
   selectedVoice?: string
-  onNewFile?: () => void
+  onNewFile?: (fileName: string) => void
 }
 
 export default function Microphone({
@@ -37,7 +37,7 @@ export default function Microphone({
   className = "",
   isIngesting = false,
   onMemoSelect = () => console.log("Memo selected"),
-  onNewFile = () => console.log("New file button clicked"),
+  onNewFile = (fileName: string) => console.log("New file button clicked", fileName ),
 }: MicrophoneProps) {
   const [scrollPosition, setScrollPosition] = useState(0);
   // Use a single ref for both status texts
@@ -120,6 +120,7 @@ export default function Microphone({
           commandShortcut={"K"}
           mobile={isMobile}
           onMemoSelect={onMemoSelect}
+          onCreateFile={onNewFile}
         />
       </div>
     </div>
